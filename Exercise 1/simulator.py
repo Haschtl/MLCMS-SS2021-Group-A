@@ -311,7 +311,7 @@ class Simulator:
 #             Discrete time Simulation loop                   #
 ###############################################################
 
-    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = True, monitoring: bool = True, pause: float = 0.1):
+    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = True, monitoring: bool = False, pause: float = 0.1):
         """
         Starts the simulation with a simple, discrete-time update scheme
         Args:
@@ -321,6 +321,7 @@ class Simulator:
             history_len: Length of history (higher value: better average speed calculation, less performance)
             grid_scaling: Value represents scaling in meters: grid_scaling*index [meter]
             visualize: Visualize each time-step
+            monitoring: Adds statistics on the visualization
             pause: Pause after each simulation step
         """
         self.grid_scaling = grid_scaling  
@@ -369,10 +370,10 @@ class Simulator:
             if monitoring:
                 self.monitor(remaining_pedestrians, simulation_time)
                 self.draw_monitoring(axs)
-            # if visualize:
-            #     self.draw(pause)
-            # else:
-            #     time.sleep(pause)
+            elif visualize:
+                self.draw(pause)
+            else:
+                time.sleep(pause)
             print("Time: {}s / {}s\tPeds: {}".format(simulation_time,
                   duration, len(remaining_pedestrians)))
 
