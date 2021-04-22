@@ -39,6 +39,15 @@ def nearest(current_position: tuple[int, int], positions: list[tuple[int, int]])
     return positions[np.argmin(distances)]
 
 
+def nearest_dist(current_position: tuple[int, int], positions: list[tuple[int, int]]):
+    """
+
+    """
+    distances = [euclidean_norm(current_position, pos)
+                 for pos in positions]
+    return np.min(distances)
+    
+
 class Simulator:
     '''
     Simulator class containing all functions to perform simple crowd simulations
@@ -56,8 +65,16 @@ class Simulator:
         '''
         self.grid_scaling = grid_scaling  # Value represents scaling in meters: grid_scaling*index [meter]
         self.scenario: np.array = np.array([])
+        self.all_targets = self._all_targets
+        self.all_obstacles = self._all_obstacles
         self.time_step: float = time_step
         self.duration: float = duration
+        self.statistics = {
+            "time": [],
+            "pedestrians": [],
+            "avg_distance": [],
+            "avg_velocity": [],
+        }
         # History has max-length of 10
         self.history: deque = deque([], history_length)
         self.last_history: list = []
@@ -68,7 +85,7 @@ class Simulator:
         Initialize plot
         '''
         plt.ion()  # Plots are shown non-blocking
-        plt.axis('square')
+        # plt.axis('square')
 
     def stay_open(self):
         '''
@@ -100,7 +117,9 @@ class Simulator:
         - Target: 2
         '''
         self.scenario = np.load(filepath)
-        self.draw()
+        self.all_targets = self._all_targets
+        self.all_obstacles = self._all_obstacles
+        # self.draw()
 
     @property
     def all_pedestrians(self):
@@ -110,14 +129,14 @@ class Simulator:
         return np.argwhere(self.scenario == 1)
 
     @property
-    def all_targets(self):
+    def _all_targets(self):
         """
         Returns a list of tuples with indices of targets
         """
         return np.argwhere(self.scenario == 2)
 
     @property
-    def all_obstacles(self):
+    def _all_obstacles(self):
         """
         Returns a list of tuples with indices of obstacles
         """
@@ -229,7 +248,7 @@ class Simulator:
         for move in self.history[-1]:
             if position[0] == move[1][0] and position[1] == move[1][1]:
                 return move[0]
-        return None
+        return position
 
     def last_positions(self, position: tuple[int, int], history_idx: int = -1):
         """
@@ -254,6 +273,15 @@ class Simulator:
             return last
         else:
             return [position]
+
+    def velocity(self, position: tuple[int, int]):
+        """
+        Returns the last velocity of a pedestrian in m/s
+        """
+        last_position = self.last_position(position)
+        return euclidean_norm(last_position, position)
+
+
 
     def average_velocity(self, position: tuple[int, int]):
         """
@@ -283,7 +311,7 @@ class Simulator:
 #             Discrete time Simulation loop                   #
 ###############################################################
 
-    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, visualize: bool = True, pause: float = 0.1):
+    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = True, monitoring: bool = True, pause: float = 0.1):
         """
         Starts the simulation with a simple, discrete-time update scheme
         Args:
@@ -291,15 +319,38 @@ class Simulator:
             duration: Maximum simulation time (-1 for infinite) [s]
             timeout: Maximum seconds of no moving pedestrian (-1 to disable) [s]
             history_len: Length of history (higher value: better average speed calculation, less performance)
+            grid_scaling: Value represents scaling in meters: grid_scaling*index [meter]
             visualize: Visualize each time-step
             pause: Pause after each simulation step
         """
+        self.grid_scaling = grid_scaling  
         simulation_time = 0
         self.time_step = time_step
         self.duration = duration
         self.history.clear()
         self.history = deque([],history_length)
         stuck_counter=0
+        self.statistics = {
+            "time":[],
+            "pedestrians":[],
+            "avg_distance":[],
+            "avg_velocity":[],
+        }
+        if monitoring:
+            # fig, axs = plt.subplots(4)
+            fig = plt.figure(constrained_layout=True)
+            axs = []
+            gs = fig.add_gridspec(3, 3)
+            ax1 = fig.add_subplot(gs[0, 2])
+            ax1.set_title("Pedestrians")
+            axs.append(ax1)
+            ax2 = fig.add_subplot(gs[1, 2])
+            ax2.set_title("Average distance to target")
+            axs.append(ax2)
+            ax3 = fig.add_subplot(gs[2, 2])
+            ax3.set_title("Average velocity")
+            axs.append(ax3)
+            axs.append(fig.add_subplot(gs[:, :-1]))
         '''
         Start the simulation
         '''
@@ -314,17 +365,24 @@ class Simulator:
             else:
                 stuck_counter = 0
             self.history.append(self.last_history)
-            if visualize:
-                self.draw(pause)
-            else:
-                time.sleep(pause)
             remaining_pedestrians = self.all_pedestrians
+            if monitoring:
+                self.monitor(remaining_pedestrians, simulation_time)
+                self.draw_monitoring(axs)
+            # if visualize:
+            #     self.draw(pause)
+            # else:
+            #     time.sleep(pause)
+            print("Time: {}s / {}s\tPeds: {}".format(simulation_time,
+                  duration, len(remaining_pedestrians)))
+
+
             if len(remaining_pedestrians) == 0:
                 print("All pedestrians reached the target position")
                 break
-            print("Time: {}s / {}s\tPeds: {}".format(simulation_time,
-                  duration, len(remaining_pedestrians)))
             simulation_time += time_step
+        if monitoring:
+            self.draw_monitoring(axs)
 
     def simulate(self, simulation_time: float):
         """
@@ -333,6 +391,45 @@ class Simulator:
         # self.random_walk()
         # self.random_walk2(diagonal=False)
         self.direct_way(diagonal=True)
+
+    def monitor(self, remaining_pedestrians, simulation_time: float):
+        self.statistics["time"].append(simulation_time)
+        self.statistics["pedestrians"].append(len(remaining_pedestrians))
+        self.statistics["avg_distance"].append(np.average(
+            [nearest_dist(ped, self.all_targets) for ped in remaining_pedestrians]))
+        self.statistics["avg_velocity"].append(np.average(
+            [self.velocity(ped) for ped in remaining_pedestrians]))
+    
+    def draw_monitoring(self, axs):
+        # plt.figure()
+        # axs[0].clear()
+        # axs[0].xlabel("Time [s]")
+        # axs[0].ylabel("Pedestrians")
+        
+        axs[0].clear()
+        axs[1].clear()
+        axs[2].clear()
+        axs[3].clear()
+        # plt.cla()
+        plt.pcolormesh(self.scenario, **plot_config, cmap=cmap, norm=norm)
+        # # plt.show()
+        plt.draw()
+        try:
+            axs[0].plot(self.statistics["time"], self.statistics["pedestrians"])
+        except Exception:
+            pass
+        # axs[0].show()
+        # plt.xlabel("Time [s]")
+        # plt.ylabel("Average distance [m]")
+        try:
+            axs[1].plot(self.statistics["time"], self.statistics["avg_distance"])
+        except Exception:
+            pass
+        try:
+            axs[2].plot(self.statistics["time"], self.statistics["avg_velocity"])
+        except Exception as e:
+            print(e)
+        plt.pause(0.1)
 
 
 ###############################################################
@@ -359,11 +456,19 @@ class Simulator:
                 idx = np.random.randint(len(neighbours))
                 self.move2(ped, neighbours[idx])
 
-    def direct_way(self, velocity: float = 1, diagonal: bool = True):
+    def direct_way(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
         """
         Each pedestrian moves to the neighbour, which is nearest to a target
+        Args:
+            velocity: Target-velocity (m/s), should be 1, must not be >1
+            pedestrians_must_move: If true, pedestrians can't stay on their position if they could move
         """
-        for ped in self.all_pedestrians:
+        if velocity>1:
+            print("Velocity > 1 not possible")
+        all_peds = self.all_pedestrians
+        # randomized order to prevent line-reading effects
+        np.random.shuffle(all_peds)
+        for ped in all_peds:  
             # get the empty (or target) neighbours of the pedestrian
             neighbours = self.neighbours(ped, diagonal)
             # get the average-velocity of the pedestrian
@@ -373,8 +478,12 @@ class Simulator:
                 # this makes pedestrians have a equal velocity (bug: if the pedestrian stands still for some time, he will move faster than the max-speed)
                 # get the target which is nearest to the pedestrian
                 nearest_target = nearest(ped, self.all_targets)
-                neighbour_nearest_to_target = nearest(
-                    nearest_target, [ped, *neighbours])  # get the neighbour which is nearest to that target
+                if pedestrians_must_move:
+                    neighbour_nearest_to_target = nearest(
+                        nearest_target, neighbours)  # get the neighbour which is nearest to that target
+                else:
+                    neighbour_nearest_to_target = nearest(
+                        nearest_target, [ped, *neighbours])  # get the neighbour which is nearest to that target
 
                 # move the pedestrian to the target
                 self.move2(ped, neighbour_nearest_to_target)
@@ -387,7 +496,7 @@ if __name__ == "__main__":
     sim.load(filename)
 
     try:
-        sim.start(history_length=10)
+        sim.start()
     except KeyboardInterrupt:
         print("Simulation aborted")
 

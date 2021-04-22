@@ -28,6 +28,10 @@ Simulator.is_empty_position(position: tuple[int, int], verbose: bool = False) # 
 ```
 
 
+# Findings:
+- pedestrians_must_move:
+  If pedestrians are forced to move, if they can (even in wrong directions), they tend less to build stucky crowds (e.g. crowd.npy)
+
 # Known bugs
 
 Pedestrians can walk through thin diagonal walls:
