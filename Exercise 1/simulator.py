@@ -6,7 +6,7 @@ import time
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors
-from collections import deque
+from collections import deque, Counter
 from tkinter.filedialog import askopenfilename
 
 # np.set_printoptions(threshold=sys.maxsize)
@@ -46,7 +46,24 @@ def nearest_dist(current_position: tuple[int, int], positions: list[tuple[int, i
     distances = [euclidean_norm(current_position, pos)
                  for pos in positions]
     return np.min(distances)
-    
+
+def minimum_value_index_not_in_list(costmap_dict, traversed):
+    """
+    Returns minimum valued index in the costmap that is not in the traversed list
+    """
+    sorted_costmap_indices = sorted(costmap_dict, key=costmap_dict.get)
+    for i in sorted_costmap_indices:
+        if i not in traversed:
+            return i
+
+def lowest_cost(costmap: np.array, cells: list[tuple[int, int]]):
+    """
+    Returns cell index with lowest cost in costmap from given list of cells
+    """
+    cell_costs = {cell : costmap[cell[0]][cell[1]] for cell in cells}
+    lowest_cost_cell = min(cell_costs, key=cell_costs.get)
+    return lowest_cost_cell
+
 
 class Simulator:
     '''
@@ -67,6 +84,7 @@ class Simulator:
         self.scenario: np.array = np.array([])
         self.all_targets = self._all_targets
         self.all_obstacles = self._all_obstacles
+        self.costmap: np.array = np.array([])
         self.time_step: float = time_step
         self.duration: float = duration
         self.statistics = {
@@ -306,6 +324,41 @@ class Simulator:
             return None
         return euclidean_norm(position, last_position)
 
+    def calculate_costs(self, diagonal: bool = True):
+        # FIXME: THIS IS WAY TOO SLOW
+        # create costmap filled with inf on all cells
+        costmap = np.full(self.scenario.shape, np.inf)
+        # set target costs to 0
+        for t in self.all_targets:
+            costmap[t[0]][t[1]] = 0
+        # get indices of costmap in a costmap_indices list
+        indices = np.indices(costmap.shape)
+        costmap_indices = []
+        for e in indices.transpose(1,2,0).tolist():
+            costmap_indices += e
+        # create a dict mapping indices to costs
+        costmap_indices = [tuple(e) for e in costmap_indices]# if e not in self.all_obstacles.tolist()]
+        costmap_dict = dict(zip(costmap_indices, costmap.flatten()))
+        # Dijkstra's algorithm to fill costmap with cost values
+        traversed = []
+        while Counter(traversed) != Counter(costmap_indices):
+            minimum_cost_index = minimum_value_index_not_in_list(costmap_dict, traversed)
+            traversed.append(minimum_cost_index)
+            # create 2 lists for diagonal and non-diagonal neighbours so we can set higher cost for diagonal movement
+            neighbours = self.neighbours(minimum_cost_index, diagonal=True, pedestrians=True, obstacles=False)
+            non_diag_neighbours = self.neighbours(minimum_cost_index, diagonal=False, pedestrians=True, obstacles=False)
+            diag_neighbours = list(set(neighbours) - set(non_diag_neighbours))
+            for n in non_diag_neighbours:
+                if costmap_dict[minimum_cost_index]+1 < costmap_dict[n]:
+                    costmap_dict[n] = costmap_dict[minimum_cost_index]+1
+                    costmap[n[0]][n[1]] = costmap_dict[minimum_cost_index]+1
+            if diagonal:
+                for n in diag_neighbours:
+                    if costmap_dict[minimum_cost_index]+1.414213 < costmap_dict[n]:
+                        costmap_dict[n] = costmap_dict[minimum_cost_index]+1.414213
+                        costmap[n[0]][n[1]] = costmap_dict[minimum_cost_index]+1.414213
+        self.costmap = costmap
+
 
 ###############################################################
 #             Discrete time Simulation loop                   #
@@ -391,7 +444,7 @@ class Simulator:
         """
         # self.random_walk()
         # self.random_walk2(diagonal=False)
-        self.direct_way(diagonal=True)
+        self.direct_way(diagonal=True) # default diagonal=True
 
     def monitor(self, remaining_pedestrians, simulation_time: float):
         self.statistics["time"].append(simulation_time)
@@ -475,19 +528,8 @@ class Simulator:
             # get the average-velocity of the pedestrian
             average_velocity = self.average_velocity(ped)
             if len(neighbours) != 0 and average_velocity <= velocity:
-                # only move the pedestrian, if his average speed is lower than the maximum velocity (default 1m/s ~ 1 idx/iteration)
-                # this makes pedestrians have a equal velocity (bug: if the pedestrian stands still for some time, he will move faster than the max-speed)
-                # get the target which is nearest to the pedestrian
-                nearest_target = nearest(ped, self.all_targets)
-                if pedestrians_must_move:
-                    neighbour_nearest_to_target = nearest(
-                        nearest_target, neighbours)  # get the neighbour which is nearest to that target
-                else:
-                    neighbour_nearest_to_target = nearest(
-                        nearest_target, [ped, *neighbours])  # get the neighbour which is nearest to that target
-
-                # move the pedestrian to the target
-                self.move2(ped, neighbour_nearest_to_target)
+                neighbour_with_lowest_cost = lowest_cost(self.costmap, neighbours)
+                self.move2(ped, neighbour_with_lowest_cost)
 
 if __name__ == "__main__":
     filename = askopenfilename()
@@ -495,6 +537,8 @@ if __name__ == "__main__":
         sys.exit(-1)
     sim = Simulator()
     sim.load(filename)
+    sim.calculate_costs(diagonal=True)
+    print(sim.costmap)
 
     try:
         sim.start()
