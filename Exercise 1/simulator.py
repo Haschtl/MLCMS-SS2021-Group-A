@@ -56,6 +56,15 @@ def minimum_value_index_not_in_list(costmap_dict, traversed):
         if i not in traversed:
             return i
 
+def minimum_value_index_in_list(costmap, non_traversed):
+    """
+    Returns minimum valued index in the costmap that is in the non_traversed list
+    """
+    indexlisttranspose = np.array(non_traversed).T.tolist()
+    filtered_costmap = costmap[tuple(indexlisttranspose)]
+    sorted_costmap_indices = np.argsort(filtered_costmap.ravel(), axis=None)
+    return non_traversed[sorted_costmap_indices[0]]
+
 def lowest_cost(costmap: np.array, cells: list[tuple[int, int]]):
     """
     Returns cell index with lowest cost in costmap from given list of cells
@@ -329,7 +338,6 @@ class Simulator:
         return euclidean_norm(position, last_position)
 
     def calculate_costs(self, diagonal: bool = True):
-        # FIXME: THIS IS WAY TOO SLOW
         # create costmap filled with inf on all cells
         print("Calculating costmap...")
         costmap = np.full(self.scenario.shape, np.inf)
@@ -343,12 +351,13 @@ class Simulator:
             costmap_indices += e
         # create a dict mapping indices to costs
         costmap_indices = [tuple(e) for e in costmap_indices]# if e not in self.all_obstacles.tolist()]
-        costmap_dict = dict(zip(costmap_indices, costmap.flatten()))
+
         # Dijkstra's algorithm to fill costmap with cost values
+        non_traversed = [tuple(e) for e in costmap_indices]
         traversed = []
+        
         last_progress = 0
-        # while Counter(traversed) != Counter(costmap_indices):
-        while len(traversed) != len(costmap_indices):
+        while Counter(traversed) != Counter(costmap_indices):
             progress = round(len(traversed)/len(costmap_indices)*100)
             if progress-last_progress>=5:
                 print("{}%".format(progress))
@@ -356,20 +365,21 @@ class Simulator:
                 # plt.pcolormesh(costmap)
                 # plt.pause(0.1)
                 last_progress = progress
-            minimum_cost_index = minimum_value_index_not_in_list(costmap_dict, traversed)
+            minimum_cost_index = minimum_value_index_in_list(costmap, non_traversed)
+            # minimum_cost_index = minimum_value_index_not_in_list(costmap, traversed)
             traversed.append(minimum_cost_index)
+            non_traversed.remove(minimum_cost_index)
+
             # create 2 lists for diagonal and non-diagonal neighbours so we can set higher cost for diagonal movement
             non_diag_neighbours = self.neighbours(minimum_cost_index, diagonal=False, pedestrians=True, obstacles=False)
             diag_neighbours = self.neighbours(minimum_cost_index, diagonal=True, pedestrians=True, obstacles=False, nondiagonal=False)
             for n in non_diag_neighbours:
-                if costmap_dict[minimum_cost_index]+1 < costmap_dict[n]:
-                    costmap_dict[n] = costmap_dict[minimum_cost_index]+1
-                    costmap[n[0]][n[1]] = costmap_dict[minimum_cost_index]+1
+                if costmap[minimum_cost_index]+1 < costmap[n]:
+                    costmap[n] = costmap[minimum_cost_index]+1
             if diagonal:
                 for n in diag_neighbours:
-                    if costmap_dict[minimum_cost_index]+1.414213 < costmap_dict[n]:
-                        costmap_dict[n] = costmap_dict[minimum_cost_index]+1.414213
-                        costmap[n[0]][n[1]] = costmap_dict[minimum_cost_index]+1.414213
+                    if costmap[minimum_cost_index]+1.414213 < costmap[n]:
+                        costmap[n] = costmap[minimum_cost_index]+1.414213
         self.costmap = costmap
         print("done")
         plt.figure()
@@ -381,7 +391,7 @@ class Simulator:
 #             Discrete time Simulation loop                   #
 ###############################################################
 
-    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = True, monitoring: bool = False, pause: float = 0.1):
+    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = False, monitoring: bool = False, pause: float = 0.1):
         """
         Starts the simulation with a simple, discrete-time update scheme
         Args:
@@ -588,10 +598,9 @@ if __name__ == "__main__":
     sim = Simulator()
     sim.load(filename)
     # sim.calculate_costs(diagonal=True)
-    print(sim.costmap)
 
     try:
-        sim.start()
+        sim.start(visualize=True, monitoring=True)
     except KeyboardInterrupt:
         print("Simulation aborted")
 
