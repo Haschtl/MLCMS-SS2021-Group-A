@@ -312,7 +312,7 @@ class Simulator:
         Returns the last velocity of a pedestrian in m/s
         """
         last_position = self.last_position(position)
-        return euclidean_norm(last_position, position)
+        return euclidean_norm(last_position, position)*self.grid_scaling/self.time_step
 
 
 
@@ -393,7 +393,7 @@ class Simulator:
 #             Discrete time Simulation loop                   #
 ###############################################################
 
-    def start(self, time_step: float = 1, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 1, visualize: bool = False, monitoring: bool = False, pause: float = 0.1):
+    def start(self, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 0.4, visualize: bool = False, monitoring: bool = False, pause: float = 0.1, velocity:float = 1.33, **kwargs):
         """
         Starts the simulation with a simple, discrete-time update scheme
         Args:
@@ -406,6 +406,7 @@ class Simulator:
             monitoring: Adds statistics on the visualization
             pause: Pause after each simulation step
         """
+        time_step = grid_scaling/velocity
         self.grid_scaling = grid_scaling  
         simulation_time = 0
         self.time_step = time_step
@@ -439,7 +440,7 @@ class Simulator:
         '''
         while simulation_time <= duration or duration == -1:
             self.last_history = []
-            self.simulate(simulation_time)
+            self.simulate(simulation_time, velocity=velocity, **kwargs)
             if len(self.last_history) == 0:
                 stuck_counter += 1
                 if stuck_counter*time_step>=timeout and timeout!=-1:
@@ -467,20 +468,21 @@ class Simulator:
         if monitoring:
             self.draw_monitoring(axs)
 
-    def simulate(self, simulation_time: float):
+    def simulate(self, simulation_time: float, velocity: float, **kwargs):
         """
         This is the main function executed for each time-step
         """
         # self.random_walk()
         # self.random_walk2(diagonal=False)
         # self.direct_way(diagonal=True) # default diagonal=True
-        self.avoid_obstacles(diagonal=True, pedestrians_must_move=False) # default diagonal=True
+        # self.avoid_obstacles(diagonal=True, pedestrians_must_move=False) # default diagonal=True
+        self.avoid_obstacles(velocity, **kwargs) # default diagonal=True
 
     def monitor(self, remaining_pedestrians, simulation_time: float):
         self.statistics["time"].append(simulation_time)
         self.statistics["pedestrians"].append(len(remaining_pedestrians))
         self.statistics["avg_distance"].append(np.average(
-            [nearest_dist(ped, self.all_targets) for ped in remaining_pedestrians]))
+            [nearest_dist(ped, self.all_targets)*self.grid_scaling for ped in remaining_pedestrians]))
         self.statistics["avg_velocity"].append(np.average(
             [self.velocity(ped) for ped in remaining_pedestrians]))
     
@@ -604,7 +606,8 @@ if __name__ == "__main__":
     # sim.calculate_costs(diagonal=True)
 
     try:
-        sim.start(visualize=True, monitoring=True)
+        sim.start(visualize=True, monitoring=True, grid_scaling=0.4,
+                  velocity=1.33, diagonal=True, pedestrians_must_move=False)
     except KeyboardInterrupt:
         print("Simulation aborted")
 

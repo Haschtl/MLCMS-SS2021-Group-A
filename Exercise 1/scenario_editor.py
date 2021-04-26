@@ -184,7 +184,7 @@ def image_to_array(image):
     array = np.array(image)
     # for mapping in colour_mapping:
     #     array[array==mapping[2]]=mapping[3]
-    mapped_array = np.zeros((image_width, image_height))
+    mapped_array = np.zeros((image_height,image_width))
     for x, row in enumerate(mapped_array):
         for y, cell in enumerate(row):
             for mapping in colour_mapping:
