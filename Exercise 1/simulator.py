@@ -62,8 +62,10 @@ def minimum_value_index_in_list(costmap, non_traversed):
     """
     indexlisttranspose = np.array(non_traversed).T.tolist()
     filtered_costmap = costmap[tuple(indexlisttranspose)]
-    sorted_costmap_indices = np.argsort(filtered_costmap.ravel(), axis=None)
-    return non_traversed[sorted_costmap_indices[0]]
+    # sorted_costmap_indices = np.argsort(filtered_costmap.ravel(), axis=None)
+    # return non_traversed[sorted_costmap_indices[0]]
+    min_indice = np.argmin(filtered_costmap.ravel(), axis=None)
+    return non_traversed[min_indice]
 
 def lowest_cost(costmap: np.array, cells: list[tuple[int, int]]):
     """
