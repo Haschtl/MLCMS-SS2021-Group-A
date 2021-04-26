@@ -137,6 +137,7 @@ class Simulator:
         self.scenario = np.load(filepath)
         self.all_targets = self._all_targets
         self.all_obstacles = self._all_obstacles
+        self.calculate_costs()
         # self.draw()
 
     @property
@@ -160,19 +161,22 @@ class Simulator:
         """
         return np.argwhere(self.scenario == -1)
 
-    def neighbours(self, position: tuple[int, int], diagonal: bool = True, pedestrians: bool = False, obstacles: bool = False, empty: bool = True, target: bool = True):
+    def neighbours(self, position: tuple[int, int], diagonal: bool = True, pedestrians: bool = False, obstacles: bool = False, empty: bool = True, target: bool = True, nondiagonal: bool = True):
         """
         Returns the indices of empty (or target) neighbours of the position
         Args:
             position: The position to check
             diagonal: Set True to include the diagonal boxes
         """
-        neighbours = [
-            (position[0]+1, position[1]+0),
-            (position[0]-1, position[1]+0),
-            (position[0]+0, position[1]+1),
-            (position[0]+0, position[1]-1)
-        ]
+        if nondiagonal:
+            neighbours = [
+                (position[0]+1, position[1]+0),
+                (position[0]-1, position[1]+0),
+                (position[0]+0, position[1]+1),
+                (position[0]+0, position[1]-1)
+            ]
+        else:
+            neighbours = []
         if diagonal:
             neighbours += [
                 (position[0]+1, position[1]+1),
@@ -327,6 +331,7 @@ class Simulator:
     def calculate_costs(self, diagonal: bool = True):
         # FIXME: THIS IS WAY TOO SLOW
         # create costmap filled with inf on all cells
+        print("Calculating costmap...")
         costmap = np.full(self.scenario.shape, np.inf)
         # set target costs to 0
         for t in self.all_targets:
@@ -341,13 +346,21 @@ class Simulator:
         costmap_dict = dict(zip(costmap_indices, costmap.flatten()))
         # Dijkstra's algorithm to fill costmap with cost values
         traversed = []
-        while Counter(traversed) != Counter(costmap_indices):
+        last_progress = 0
+        # while Counter(traversed) != Counter(costmap_indices):
+        while len(traversed) != len(costmap_indices):
+            progress = round(len(traversed)/len(costmap_indices)*100)
+            if progress-last_progress>=5:
+                print("{}%".format(progress))
+                # plt.cla()
+                # plt.pcolormesh(costmap)
+                # plt.pause(0.1)
+                last_progress = progress
             minimum_cost_index = minimum_value_index_not_in_list(costmap_dict, traversed)
             traversed.append(minimum_cost_index)
             # create 2 lists for diagonal and non-diagonal neighbours so we can set higher cost for diagonal movement
-            neighbours = self.neighbours(minimum_cost_index, diagonal=True, pedestrians=True, obstacles=False)
             non_diag_neighbours = self.neighbours(minimum_cost_index, diagonal=False, pedestrians=True, obstacles=False)
-            diag_neighbours = list(set(neighbours) - set(non_diag_neighbours))
+            diag_neighbours = self.neighbours(minimum_cost_index, diagonal=True, pedestrians=True, obstacles=False, nondiagonal=False)
             for n in non_diag_neighbours:
                 if costmap_dict[minimum_cost_index]+1 < costmap_dict[n]:
                     costmap_dict[n] = costmap_dict[minimum_cost_index]+1
@@ -358,6 +371,10 @@ class Simulator:
                         costmap_dict[n] = costmap_dict[minimum_cost_index]+1.414213
                         costmap[n[0]][n[1]] = costmap_dict[minimum_cost_index]+1.414213
         self.costmap = costmap
+        print("done")
+        plt.figure()
+        plt.pcolormesh(self.costmap)
+        input("Press ENTER to start the simulation")
 
 
 ###############################################################
@@ -444,7 +461,8 @@ class Simulator:
         """
         # self.random_walk()
         # self.random_walk2(diagonal=False)
-        self.direct_way(diagonal=True) # default diagonal=True
+        # self.direct_way(diagonal=True) # default diagonal=True
+        self.avoid_obstacles(diagonal=True) # default diagonal=True
 
     def monitor(self, remaining_pedestrians, simulation_time: float):
         self.statistics["time"].append(simulation_time)
@@ -528,6 +546,38 @@ class Simulator:
             # get the average-velocity of the pedestrian
             average_velocity = self.average_velocity(ped)
             if len(neighbours) != 0 and average_velocity <= velocity:
+                # only move the pedestrian, if his average speed is lower than the maximum velocity (default 1m/s ~ 1 idx/iteration)
+                # this makes pedestrians have a equal velocity (bug: if the pedestrian stands still for some time, he will move faster than the max-speed)
+                # get the target which is nearest to the pedestrian
+                nearest_target = nearest(ped, self.all_targets)
+                if pedestrians_must_move:
+                    neighbour_nearest_to_target = nearest(
+                        nearest_target, neighbours)  # get the neighbour which is nearest to that target
+                else:
+                    neighbour_nearest_to_target = nearest(
+                        nearest_target, [ped, *neighbours])  # get the neighbour which is nearest to that target
+
+                # move the pedestrian to the target
+                self.move2(ped, neighbour_nearest_to_target)
+
+    def avoid_obstacles(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
+        """
+        Each pedestrian moves to the neighbour, which is nearest to a target
+        Args:
+            velocity: Target-velocity (m/s), should be 1, must not be >1
+            pedestrians_must_move: If true, pedestrians can't stay on their position if they could move
+        """
+        if velocity>1:
+            print("Velocity > 1 not possible")
+        all_peds = self.all_pedestrians
+        # randomized order to prevent line-reading effects
+        np.random.shuffle(all_peds)
+        for ped in all_peds:  
+            # get the empty (or target) neighbours of the pedestrian
+            neighbours = self.neighbours(ped, diagonal)
+            # get the average-velocity of the pedestrian
+            average_velocity = self.average_velocity(ped)
+            if len(neighbours) != 0 and average_velocity <= velocity:
                 neighbour_with_lowest_cost = lowest_cost(self.costmap, neighbours)
                 self.move2(ped, neighbour_with_lowest_cost)
 
@@ -537,7 +587,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     sim = Simulator()
     sim.load(filename)
-    sim.calculate_costs(diagonal=True)
+    # sim.calculate_costs(diagonal=True)
     print(sim.costmap)
 
     try:
