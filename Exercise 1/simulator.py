@@ -202,7 +202,7 @@ class Simulator:
                 empty_neighbours.append(neighbour)
         return empty_neighbours
 
-    def move2(self, position: tuple[int, int], new_position: tuple[int, int], verbose: bool = False):
+    def move2(self, position: tuple[int, int], new_position: tuple[int, int], velocity: float = 1.33, verbose: bool = False):
         """
         Move the element at position (a,b) in x and y direction
         New position: (position[0]+x,position[1]+y)
@@ -224,11 +224,17 @@ class Simulator:
                 print("Target reached")
             self.scenario[position[0]][position[1]] = 0
             return
-        self.scenario[position[0]][position[1]] = 0
-        self.scenario[new_position[0]][new_position[1]] = value
-        self.last_history.append([np.copy(position), np.copy(new_position)])
 
-    def move(self, position: tuple[int, int], x: int, y: int, verbose: bool = False):
+        average_velocity = self.average_velocity(position)
+        if average_velocity <= velocity:
+            self.scenario[position[0]][position[1]] = 0
+            self.scenario[new_position[0]][new_position[1]] = value
+            self.last_history.append([np.copy(position), np.copy(new_position)])
+        else:
+            self.last_history.append([np.copy(position), np.copy(position)])
+
+
+    def move(self, position: tuple[int, int], x: int, y: int, velocity:float = 1.33, verbose: bool = False):
         """
         Move the element at position (a,b) in x and y direction
         New position: (position[0]+x,position[1]+y)
@@ -237,7 +243,7 @@ class Simulator:
         If new position is a target, the new position stays a target
         """
         new_position = (position[0]+x, position[1]+y)
-        self.move2(position, new_position, verbose)
+        self.move2(position, new_position, velocity, verbose)
 
     def is_valid_position(self, position: tuple[int, int], verbose: bool = False):
         """
@@ -306,6 +312,23 @@ class Simulator:
             return last
         else:
             return [position]
+
+    def last_move(self, position: tuple[int, int], history_idx: int = -1):
+        """
+        Returns the number of timesteps since last move, None if not found
+        """
+        if len(self.history) == 0:
+            return None
+        # check if there was a move from this position
+        for move in self.history[history_idx]:
+            if position[0] == move[1][0] and position[1] == move[1][1]:
+                return -history_idx-1
+        # if no move was found, search back in history
+        if -(history_idx-1) <= len(self.history):
+            return self.last_move(position, history_idx-1)
+        else:
+            return None #len(self.history)
+
 
     def velocity(self, position: tuple[int, int]):
         """
@@ -522,16 +545,16 @@ class Simulator:
 #                 Timestep implementations                    #
 ###############################################################
 
-    def random_walk(self):
+    def random_walk(self, velocity:float=1):
         """
         performs a random step for all pedestrians
         If the position after the random step is not free, the step is ignored
         """
         for ped in self.all_pedestrians:
             dirs = np.random.randint(3, size=2)-1
-            self.move(ped, *dirs)
+            self.move(ped, *dirs, velocity)
 
-    def random_walk2(self, diagonal: bool = True):
+    def random_walk2(self, velocity:float=1, diagonal: bool = True):
         """
         performs a random step for all pedestrians
         Each selects a random free neighbour to go to
@@ -540,7 +563,7 @@ class Simulator:
             neighbours = self.neighbours(ped, diagonal)
             if len(neighbours) != 0:
                 idx = np.random.randint(len(neighbours))
-                self.move2(ped, neighbours[idx])
+                self.move2(ped, neighbours[idx], velocity)
 
     def direct_way(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
         """
@@ -549,8 +572,6 @@ class Simulator:
             velocity: Target-velocity (m/s), should be 1, must not be >1
             pedestrians_must_move: If true, pedestrians can't stay on their position if they could move
         """
-        if velocity>1:
-            print("Velocity > 1 not possible")
         all_peds = self.all_pedestrians
         # randomized order to prevent line-reading effects
         np.random.shuffle(all_peds)
@@ -572,17 +593,15 @@ class Simulator:
                         nearest_target, [ped, *neighbours])  # get the neighbour which is nearest to that target
 
                 # move the pedestrian to the target
-                self.move2(ped, neighbour_nearest_to_target)
+                self.move2(ped, neighbour_nearest_to_target, velocity)
 
-    def avoid_obstacles(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
+    def avoid_obstacles(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True, premovement_time: float = 1):
         """
         Each pedestrian moves to the neighbour, which is nearest to a target
         Args:
             velocity: Target-velocity (m/s), should be 1, must not be >1
             pedestrians_must_move: If true, pedestrians can't stay on their position if they could move
         """
-        if velocity>1:
-            print("Velocity > 1 not possible")
         all_peds = self.all_pedestrians
         # randomized order to prevent line-reading effects
         np.random.shuffle(all_peds)
@@ -592,10 +611,25 @@ class Simulator:
             if not pedestrians_must_move:
                 neighbours=[*neighbours,tuple(ped)]
             # get the average-velocity of the pedestrian
-            average_velocity = self.average_velocity(ped)
-            if len(neighbours) != 0 and average_velocity <= velocity:
+            # average_velocity = self.average_velocity(ped)
+            time_since_last_move=self.last_move(ped,-1)
+            can_move = False
+            if time_since_last_move is not None:
+                time_since_last_move = time_since_last_move*self.time_step
+                if time_since_last_move == 0 or time_since_last_move >= premovement_time:
+                    # the pedestrian is already moving or
+                    # the pedestrian stand still for the premovement time
+                    can_move = True
+            else:
+                # the pedestrian did not make any move
+                simulation_time = len(self.history)*self.time_step
+                if simulation_time>=premovement_time:
+                    can_move = True
+                
+            # if len(neighbours) != 0 and average_velocity <= velocity and can_move:
+            if len(neighbours) != 0 and can_move:
                 neighbour_with_lowest_cost = lowest_cost(self.costmap, neighbours)
-                self.move2(ped, neighbour_with_lowest_cost)
+                self.move2(ped, neighbour_with_lowest_cost, velocity)
 
 if __name__ == "__main__":
     filename = askopenfilename()
@@ -607,7 +641,7 @@ if __name__ == "__main__":
 
     try:
         sim.start(visualize=True, monitoring=True, grid_scaling=0.4,
-                  velocity=1.33, diagonal=True, pedestrians_must_move=False)
+                  velocity=1.33, diagonal=True, pedestrians_must_move=False, premovement_time=1)
     except KeyboardInterrupt:
         print("Simulation aborted")
 
