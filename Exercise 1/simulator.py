@@ -352,7 +352,7 @@ class Simulator:
         for e in indices.transpose(1,2,0).tolist():
             costmap_indices += e
         # create a dict mapping indices to costs
-        costmap_indices = [tuple(e) for e in costmap_indices]# if e not in self.all_obstacles.tolist()]
+        costmap_indices = [tuple(e) for e in costmap_indices if e not in self.all_obstacles.tolist()]
 
         # Dijkstra's algorithm to fill costmap with cost values
         non_traversed = [tuple(e) for e in costmap_indices]
@@ -474,7 +474,7 @@ class Simulator:
         # self.random_walk()
         # self.random_walk2(diagonal=False)
         # self.direct_way(diagonal=True) # default diagonal=True
-        self.avoid_obstacles(diagonal=True) # default diagonal=True
+        self.avoid_obstacles(diagonal=True, pedestrians_must_move=False) # default diagonal=True
 
     def monitor(self, remaining_pedestrians, simulation_time: float):
         self.statistics["time"].append(simulation_time)
@@ -587,6 +587,8 @@ class Simulator:
         for ped in all_peds:  
             # get the empty (or target) neighbours of the pedestrian
             neighbours = self.neighbours(ped, diagonal)
+            if not pedestrians_must_move:
+                neighbours=[*neighbours,tuple(ped)]
             # get the average-velocity of the pedestrian
             average_velocity = self.average_velocity(ped)
             if len(neighbours) != 0 and average_velocity <= velocity:
