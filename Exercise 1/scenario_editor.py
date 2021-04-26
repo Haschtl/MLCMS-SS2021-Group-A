@@ -190,7 +190,7 @@ def image_to_array(image):
             for mapping in colour_mapping:
                 if np.array_equal(array[x][y], mapping[2]):
                     mapped_array[x][y] = mapping[3]
-    mapped_array = np.flip(mapped_array, 1)
+    mapped_array = np.flip(mapped_array, 0)
     return mapped_array
 
 
