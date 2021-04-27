@@ -416,7 +416,7 @@ class Simulator:
 #             Discrete time Simulation loop                   #
 ###############################################################
 
-    def start(self, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 0.4, visualize: bool = False, monitoring: bool = False, pause: float = 0.1, velocity:float = 1.33, **kwargs):
+    def start(self, duration: float = 1000, timeout: float = 10, history_length: int = 5, grid_scaling: float = 0.4, visualize: bool = False, monitoring: bool = False, pause: float = 0.1, velocity:float = 1.33, velocity_control_cells=None, **kwargs):
         """
         Starts the simulation with a simple, discrete-time update scheme
         Args:
@@ -443,6 +443,11 @@ class Simulator:
             "avg_distance":[],
             "avg_velocity":[],
         }
+        self.velocity_control_cells=velocity_control_cells
+        self.velocity_trackers = None
+        if velocity_control_cells is not None:
+            self.velocity_trackers = {k : [] for k, v in velocity_control_cells.items()}
+        self.initial_pedestrian_count = self.all_pedestrians
         if monitoring:
             # fig, axs = plt.subplots(4)
             fig = plt.figure(constrained_layout=True)
@@ -463,7 +468,7 @@ class Simulator:
         '''
         while simulation_time <= duration or duration == -1:
             self.last_history = []
-            self.simulate(simulation_time, velocity=velocity, **kwargs)
+            self.simulate(simulation_time=simulation_time, velocity=velocity, **kwargs)
             if len(self.last_history) == 0:
                 stuck_counter += 1
                 if stuck_counter*time_step>=timeout and timeout!=-1:
@@ -488,6 +493,15 @@ class Simulator:
                 print("All pedestrians reached the target position")
                 break
             simulation_time += time_step
+        # calculate avg velocity and flow in measuring cells
+        if self.velocity_control_cells is not None:
+            ped_density = len(self.initial_pedestrian_count) / (self.scenario.shape[0] * self.scenario.shape[1])
+            for k, vt in self.velocity_trackers.items():
+                if len(vt) > 0:
+                    vel = sum(vt) / len(vt)
+                    flow = vel * ped_density
+                    print("average velocity measured in {} : {}".format(k, vel))
+                    print("flow measured in {} : {}".format(k, flow))
         if monitoring:
             self.draw_monitoring(axs)
 
@@ -499,7 +513,7 @@ class Simulator:
         # self.random_walk2(diagonal=False)
         # self.direct_way(diagonal=True) # default diagonal=True
         # self.avoid_obstacles(diagonal=True, pedestrians_must_move=False) # default diagonal=True
-        self.avoid_obstacles(velocity, **kwargs) # default diagonal=True
+        self.avoid_obstacles(simulation_time=simulation_time, velocity=velocity, **kwargs) # default diagonal=True
 
     def monitor(self, remaining_pedestrians, simulation_time: float):
         self.statistics["time"].append(simulation_time)
@@ -595,7 +609,7 @@ class Simulator:
                 # move the pedestrian to the target
                 self.move2(ped, neighbour_nearest_to_target, velocity)
 
-    def avoid_obstacles(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True, premovement_time: float = 1):
+    def avoid_obstacles(self, simulation_time: float, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True, premovement_time: float = 1):
         """
         Each pedestrian moves to the neighbour, which is nearest to a target
         Args:
@@ -605,14 +619,20 @@ class Simulator:
         all_peds = self.all_pedestrians
         # randomized order to prevent line-reading effects
         np.random.shuffle(all_peds)
-        for ped in all_peds:  
+        for ped in all_peds:
             # get the empty (or target) neighbours of the pedestrian
             neighbours = self.neighbours(ped, diagonal)
             if not pedestrians_must_move:
                 neighbours=[*neighbours,tuple(ped)]
             # get the average-velocity of the pedestrian
-            # average_velocity = self.average_velocity(ped)
+            average_velocity = self.average_velocity(ped)
             time_since_last_move=self.last_move(ped,-1)
+            # record velocities of peds in measuring cells
+            if self.velocity_control_cells is not None and 10 < simulation_time < 70:
+                for k, vcc in self.velocity_control_cells.items():
+                    if tuple(ped) in vcc:
+                        self.velocity_trackers[k].append(average_velocity)
+
             can_move = False
             if time_since_last_move is not None:
                 time_since_last_move = time_since_last_move*self.time_step
@@ -640,8 +660,11 @@ if __name__ == "__main__":
     # sim.calculate_costs(diagonal=True)
 
     try:
-        sim.start(visualize=True, monitoring=True, grid_scaling=0.4,
-                  velocity=1.33, diagonal=True, pedestrians_must_move=False, premovement_time=1)
+        sim.start(visualize=True, monitoring=False, grid_scaling=0.4,
+                  velocity=1.33, diagonal=True, pedestrians_must_move=False, premovement_time=1,
+                  velocity_control_cells=None)
+                  #velocity_control_cells={"main":[(1,44),(1,45),(2,44),(2,45)], "control1":[], "control2":[]})
+                  # commented out velocity_control_cells are for the crowd.npy scenario
     except KeyboardInterrupt:
         print("Simulation aborted")
 
