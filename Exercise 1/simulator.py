@@ -509,9 +509,10 @@ class Simulator:
         """
         This is the main function executed for each time-step
         """
+        # no need to use calculate_costs() if using anything other than avoid_obstacles()
         # self.random_walk()
         # self.random_walk2(diagonal=False)
-        # self.direct_way(diagonal=True) # default diagonal=True
+        # self.direct_way(simulation_time=simulation_time, velocity=velocity, diagonal=True) # default diagonal=True
         # self.avoid_obstacles(diagonal=True, pedestrians_must_move=False) # default diagonal=True
         self.avoid_obstacles(simulation_time=simulation_time, velocity=velocity, **kwargs) # default diagonal=True
 
@@ -579,7 +580,7 @@ class Simulator:
                 idx = np.random.randint(len(neighbours))
                 self.move2(ped, neighbours[idx], velocity)
 
-    def direct_way(self, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
+    def direct_way(self, simulation_time: float, velocity: float = 1, pedestrians_must_move: bool =True, diagonal: bool = True):
         """
         Each pedestrian moves to the neighbour, which is nearest to a target
         Args:
@@ -594,6 +595,23 @@ class Simulator:
             neighbours = self.neighbours(ped, diagonal)
             # get the average-velocity of the pedestrian
             average_velocity = self.average_velocity(ped)
+
+            # record velocities of peds in measuring cells
+            if self.velocity_control_cells is not None and 10 < simulation_time < 70:
+                for k, vcc in self.velocity_control_cells.items():
+                    if tuple(ped) in vcc:
+                    #    print("{} in {}", tuple(ped), vcc)
+                        self.velocity_trackers[k].append(average_velocity)
+            if self.velocity_control_cells is not None and 70 < simulation_time < 75:
+                ped_density = len(self.initial_pedestrian_count) / (self.scenario.shape[0] * self.scenario.shape[1])
+                for k, vt in self.velocity_trackers.items():
+                    if len(vt) > 0:
+                        vel = sum(vt) / len(vt)
+                        flow = vel * ped_density
+                        print("average velocity measured in {} : {}".format(k, vel))
+                        print("flow measured in {} : {}".format(k, flow))
+
+
             if len(neighbours) != 0 and average_velocity <= velocity:
                 # only move the pedestrian, if his average speed is lower than the maximum velocity (default 1m/s ~ 1 idx/iteration)
                 # this makes pedestrians have a equal velocity (bug: if the pedestrian stands still for some time, he will move faster than the max-speed)
@@ -632,6 +650,14 @@ class Simulator:
                 for k, vcc in self.velocity_control_cells.items():
                     if tuple(ped) in vcc:
                         self.velocity_trackers[k].append(average_velocity)
+            if self.velocity_control_cells is not None and 70 < simulation_time < 71:
+                ped_density = len(self.initial_pedestrian_count) / (self.scenario.shape[0] * self.scenario.shape[1])
+                for k, vt in self.velocity_trackers.items():
+                    if len(vt) > 0:
+                        vel = sum(vt) / len(vt)
+                        flow = vel * ped_density
+                        print("average velocity measured in {} : {}".format(k, vel))
+                        print("flow measured in {} : {}".format(k, flow))
 
             can_move = False
             if time_since_last_move is not None:
@@ -660,11 +686,13 @@ if __name__ == "__main__":
     # sim.calculate_costs(diagonal=True)
 
     try:
-        sim.start(visualize=True, monitoring=False, grid_scaling=0.4,
+        sim.start(visualize=True, monitoring=True, grid_scaling=0.4,
                   velocity=1.33, diagonal=True, pedestrians_must_move=False, premovement_time=1,
                   velocity_control_cells=None)
-                  #velocity_control_cells={"main":[(1,44),(1,45),(2,44),(2,45)], "control1":[], "control2":[]})
-                  # commented out velocity_control_cells are for the crowd.npy scenario
+                  #velocity_control_cells={"main":[(y,x) for x in range(248,252) for y in range(11,16)],
+                  #                        "control1":[(y,x) for x in range(248,252) for y in range(16,21)],
+                  #                        "control2":[(y,x) for x in range(198,202) for y in range(11,16)]})
+                  # commented out velocity_control_cells are for the rimea4downscaled05.npy scenario
     except KeyboardInterrupt:
         print("Simulation aborted")
 
