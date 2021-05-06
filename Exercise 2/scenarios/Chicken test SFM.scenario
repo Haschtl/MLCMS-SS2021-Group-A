@@ -2,7 +2,6 @@
   "name" : "Chicken test SFM",
   "description" : "",
   "release" : "1.15",
-  "commithash" : "27bc882f6125b56a956bb8dac46549fba5b30c8c",
   "processWriters" : {
     "files" : [ {
       "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.EventtimePedestrianIdOutputFile",

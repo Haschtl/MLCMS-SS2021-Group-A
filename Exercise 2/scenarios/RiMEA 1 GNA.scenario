@@ -162,7 +162,7 @@
           "x" : 0.0,
           "y" : 0.0
         },
-        "freeFlowSpeed" : 0.9182215123206384,
+        "freeFlowSpeed" : 1.33,
         "followers" : [ ],
         "idAsTarget" : -1,
         "isChild" : false,
