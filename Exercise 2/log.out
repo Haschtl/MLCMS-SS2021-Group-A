@@ -1,0 +1,235 @@
+18:29:53,908   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+18:29:53,908   INFO ScenarioRunSubCommand:52 - Created output directory: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\out
+18:29:54,494 STDOUT STDOUTERR:22 - Topography Warning:
+   The target is not used in any source. Remove target to increase performance. 
+
+18:29:54,526   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+18:29:54,666   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\scenarios\__cache__
+18:29:54,683   INFO ScenarioRun:145 - Initializing scenario: RiMEA 1 GNM...
+18:29:54,698   INFO ScenarioRun:126 - scenario context initialized.
+18:29:54,698   INFO ScenarioRun:225 - no mesh RiMEA 1 GNM.poly was found.
+18:29:54,698   INFO ScenarioRun:225 - no mesh RiMEA 1 GNM_background.poly was found.
+18:29:54,761   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+18:29:54,776   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/12741 [points]
+18:29:54,808   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1275/12741 [points]
+18:29:54,808   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 2549/12741 [points]
+18:29:54,823   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 3823/12741 [points]
+18:29:54,823   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 5097/12741 [points]
+18:29:54,823   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 6371/12741 [points]
+18:29:54,839   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 7645/12741 [points]
+18:29:54,855   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 8919/12741 [points]
+18:29:54,855   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 10193/12741 [points]
+18:29:54,855   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 11467/12741 [points]
+18:29:54,870   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:109[ms]
+18:29:54,870   INFO Topography:414 - Set PedestrianIdCount to start value: 2
+18:29:54,933   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:32[ms]
+18:29:54,948   INFO Simulation:259 - preLoop finished.
+18:29:57,728   INFO Simulation:362 - Finished writing all output files
+18:29:57,728   INFO ScenarioRun:261 - Simulation of scenario RiMEA 1 GNM finished.
+12:57:18,776   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+12:57:18,780   INFO ScenarioRunSubCommand:55 - Use output directory: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\out
+12:57:19,383 STDOUT STDOUTERR:22 - Topography Warning:
+   The target is not used in any source. Remove target to increase performance. 
+
+12:57:19,432   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+12:57:19,627   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\scenarios\__cache__
+12:57:19,639   INFO ScenarioRun:145 - Initializing scenario: RiMEA 1 GNM...
+12:57:19,647   INFO ScenarioRun:126 - scenario context initialized.
+12:57:19,650   INFO ScenarioRun:225 - no mesh RiMEA 1 GNM.poly was found.
+12:57:19,651   INFO ScenarioRun:225 - no mesh RiMEA 1 GNM_background.poly was found.
+12:57:19,723   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+12:57:19,734   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/12741 [points]
+12:57:19,769   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1275/12741 [points]
+12:57:19,783   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 2549/12741 [points]
+12:57:19,792   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 3823/12741 [points]
+12:57:19,801   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 5097/12741 [points]
+12:57:19,812   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 6371/12741 [points]
+12:57:19,822   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 7645/12741 [points]
+12:57:19,837   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 8919/12741 [points]
+12:57:19,846   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 10193/12741 [points]
+12:57:19,854   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 11467/12741 [points]
+12:57:19,869   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:137[ms]
+12:57:19,878   INFO Topography:414 - Set PedestrianIdCount to start value: 2
+12:57:19,954   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:51[ms]
+12:57:19,956   INFO Simulation:259 - preLoop finished.
+12:57:22,868   INFO Simulation:362 - Finished writing all output files
+12:57:22,869   INFO ScenarioRun:261 - Simulation of scenario RiMEA 1 GNM finished.
+12:57:36,222   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+12:57:36,222   INFO VadereApplication:25 - starting Vadere GUI...
+12:57:36,238   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+12:57:38,596   INFO IOVadere:57 - read project: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\vadere.project
+12:57:38,726   INFO IOVadere:67 - analyzed scenario files.
+12:57:39,058   INFO IOVadere:88 - analyzed: 9, migrated: 0, upToDate: 9, notMigratable: 0
+12:57:39,058   INFO IOVadere:93 - project loaded: Kaiserslautern 
+12:57:39,073   INFO ActionLoadProject:113 - refreshed output table - 2
+12:57:39,073   INFO ProjectOutput:160 - output directory 'D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\output' of project 'Kaiserslautern ' is not valid.
+12:57:39,104   INFO ProjectView:588 - selected scenario 'Chicken test GNM'
+12:57:39,448   INFO DataProcessingView:97 - switch to gui view
+12:57:39,948   INFO ProjectView:594 - repainted output table
+12:57:39,948   INFO ActionLoadProject:117 - selected the first scenario
+12:57:39,963   INFO ActionLoadProject:124 - project 'Kaiserslautern ' loaded.
+12:58:29,436   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+12:58:29,440   INFO ScenarioRunSubCommand:52 - Created output directory: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\out
+12:58:29,995 STDOUT STDOUTERR:22 - Topography Warning:
+   The target is not used in any source. Remove target to increase performance. 
+
+12:58:30,044   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+12:58:30,202   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\scenarios\__cache__
+12:58:30,211   INFO ScenarioRun:145 - Initializing scenario: RiMEA 1 OSM...
+12:58:30,217   INFO ScenarioRun:126 - scenario context initialized.
+12:58:30,220   INFO ScenarioRun:225 - no mesh RiMEA 1 OSM.poly was found.
+12:58:30,221   INFO ScenarioRun:225 - no mesh RiMEA 1 OSM_background.poly was found.
+12:58:30,301   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+12:58:30,315   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/12741 [points]
+12:58:30,349   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1275/12741 [points]
+12:58:30,361   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 2549/12741 [points]
+12:58:30,367   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 3823/12741 [points]
+12:58:30,376   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 5097/12741 [points]
+12:58:30,385   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 6371/12741 [points]
+12:58:30,394   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 7645/12741 [points]
+12:58:30,402   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 8919/12741 [points]
+12:58:30,410   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 10193/12741 [points]
+12:58:30,416   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 11467/12741 [points]
+12:58:30,426   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:120[ms]
+12:58:30,435   INFO Topography:414 - Set PedestrianIdCount to start value: 2
+12:58:30,506   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:45[ms]
+12:58:30,508   INFO Simulation:259 - preLoop finished.
+12:58:33,384   INFO Simulation:362 - Finished writing all output files
+12:58:33,384   INFO ScenarioRun:261 - Simulation of scenario RiMEA 1 OSM finished.
+12:58:49,367   INFO ProjectView:588 - selected scenario 'RiMEA 1 OSM'
+12:58:49,459   INFO ProjectView:594 - repainted output table
+12:58:53,137   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\scenarios\__cache__
+12:58:53,137   INFO ScenarioRun:145 - Initializing scenario: RiMEA 1 OSM...
+12:58:53,152   INFO ScenarioRun:126 - scenario context initialized.
+12:58:53,152   INFO ScenarioRun:225 - no mesh RiMEA 1 OSM.poly was found.
+12:58:53,152   INFO ScenarioRun:225 - no mesh RiMEA 1 OSM_background.poly was found.
+12:58:53,215   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+12:58:53,231   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/12741 [points]
+12:58:53,246   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1275/12741 [points]
+12:58:53,262   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 2549/12741 [points]
+12:58:53,277   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 3823/12741 [points]
+12:58:53,293   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 5097/12741 [points]
+12:58:53,309   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 6371/12741 [points]
+12:58:53,324   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 7645/12741 [points]
+12:58:53,324   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 8919/12741 [points]
+12:58:53,340   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 10193/12741 [points]
+12:58:53,340   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 11467/12741 [points]
+12:58:53,340   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:125[ms]
+12:58:53,356   INFO Topography:414 - Set PedestrianIdCount to start value: 2
+12:58:53,418   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:31[ms]
+12:58:53,434   INFO Simulation:259 - preLoop finished.
+12:58:56,423   INFO Simulation:362 - Finished writing all output files
+12:58:56,427   INFO ProjectView:142 - scenario RiMEA 1 OSM finished
+12:58:56,559   INFO VadereProject:302 - SimulationResult{scenarioName='"RiMEA 1 OSM", nr_overlaps (PID4)=0, state='"SimulationRun completed"}
+12:58:56,577   INFO ScenarioRun:261 - Simulation of scenario RiMEA 1 OSM finished.
+12:58:56,577   INFO ProjectView:588 - selected scenario 'RiMEA 1 OSM'
+12:58:56,671   INFO ProjectView:594 - repainted output table
+12:59:31,983   INFO ActionCloseApplication:28 - closing application...
+13:13:23,902   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+13:13:23,905   INFO ScenarioRunSubCommand:52 - Created output directory: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\out
+13:13:24,511 STDOUT STDOUTERR:22 - Topography Warning:
+   The target is not used in any source. Remove target to increase performance. 
+   Target contains an obstacle. This setup works but reduces the actual size of the target. 
+
+13:13:24,551   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+13:13:24,724   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\.\scenarios\__cache__
+13:13:24,741   INFO ScenarioRun:145 - Initializing scenario: RiMEA 6 OSM...
+13:13:24,752   INFO ScenarioRun:126 - scenario context initialized.
+13:13:24,757   INFO ScenarioRun:225 - no mesh RiMEA 6 OSM.poly was found.
+13:13:24,758   INFO ScenarioRun:225 - no mesh RiMEA 6 OSM_background.poly was found.
+13:13:24,839   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+13:13:24,848   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/17161 [points]
+13:13:24,893   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1717/17161 [points]
+13:13:24,908   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 3433/17161 [points]
+13:13:24,920   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 5149/17161 [points]
+13:13:24,937   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 6865/17161 [points]
+13:13:24,953   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 8581/17161 [points]
+13:13:24,966   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 10297/17161 [points]
+13:13:24,981   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 12013/17161 [points]
+13:13:24,997   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 13729/17161 [points]
+13:13:25,014   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 15445/17161 [points]
+13:13:25,029   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:186[ms]
+13:13:25,036   INFO Topography:414 - Set PedestrianIdCount to start value: 26
+13:13:25,079   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:24[ms]
+13:13:25,080   INFO Simulation:259 - preLoop finished.
+13:13:28,052   INFO Simulation:362 - Finished writing all output files
+13:13:28,055   INFO ScenarioRun:261 - Simulation of scenario RiMEA 6 OSM finished.
+13:13:30,206   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+13:13:30,206   INFO VadereApplication:25 - starting Vadere GUI...
+13:13:30,238   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+13:13:32,430   INFO IOVadere:57 - read project: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\vadere.project
+13:13:32,499   INFO IOVadere:67 - analyzed scenario files.
+13:13:33,016   INFO IOVadere:88 - analyzed: 10, migrated: 0, upToDate: 10, notMigratable: 0
+13:13:33,036   INFO IOVadere:93 - project loaded: Kaiserslautern 
+13:13:33,036   INFO ActionLoadProject:113 - refreshed output table - 2
+13:13:33,052   INFO ProjectView:588 - selected scenario 'Chicken test GNM'
+13:13:33,380   INFO DataProcessingView:97 - switch to gui view
+13:13:33,856   INFO ProjectView:594 - repainted output table
+13:13:33,856   INFO ActionLoadProject:117 - selected the first scenario
+13:13:33,856   INFO ActionLoadProject:124 - project 'Kaiserslautern ' loaded.
+13:13:37,242   INFO ProjectView:588 - selected scenario 'RiMEA 6 OSM'
+13:13:37,354   INFO ProjectView:594 - repainted output table
+13:13:38,479   INFO ScenarioCache:85 - Cache search location: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\scenarios\__cache__
+13:13:38,494   INFO ScenarioRun:145 - Initializing scenario: RiMEA 6 OSM...
+13:13:38,494   INFO ScenarioRun:126 - scenario context initialized.
+13:13:38,494   INFO ScenarioRun:225 - no mesh RiMEA 6 OSM.poly was found.
+13:13:38,510   INFO ScenarioRun:225 - no mesh RiMEA 6 OSM_background.poly was found.
+13:13:38,588   INFO PotentialFieldDistancesBruteForce:49 - solve floor field (PotentialFieldDistancesBruteForce)
+13:13:38,588   INFO PotentialFieldDistancesBruteForce:106 - Progress:  0% -> 0/17161 [points]
+13:13:38,635   INFO PotentialFieldDistancesBruteForce:106 - Progress: 10% -> 1717/17161 [points]
+13:13:38,651   INFO PotentialFieldDistancesBruteForce:106 - Progress: 20% -> 3433/17161 [points]
+13:13:38,666   INFO PotentialFieldDistancesBruteForce:106 - Progress: 30% -> 5149/17161 [points]
+13:13:38,697   INFO PotentialFieldDistancesBruteForce:106 - Progress: 40% -> 6865/17161 [points]
+13:13:38,713   INFO PotentialFieldDistancesBruteForce:106 - Progress: 50% -> 8581/17161 [points]
+13:13:38,713   INFO PotentialFieldDistancesBruteForce:106 - Progress: 60% -> 10297/17161 [points]
+13:13:38,729   INFO PotentialFieldDistancesBruteForce:106 - Progress: 70% -> 12013/17161 [points]
+13:13:38,729   INFO PotentialFieldDistancesBruteForce:106 - Progress: 80% -> 13729/17161 [points]
+13:13:38,729   INFO PotentialFieldDistancesBruteForce:106 - Progress: 90% -> 15445/17161 [points]
+13:13:38,744   INFO PotentialFieldDistancesBruteForce:96 - floor field initialization time:156[ms]
+13:13:38,744   INFO Topography:414 - Set PedestrianIdCount to start value: 26
+13:13:38,791   INFO EikonalSolverDefaultProvider:23 - floor field initialization time:31[ms]
+13:13:38,807   INFO Simulation:259 - preLoop finished.
+13:13:41,609   INFO Simulation:362 - Finished writing all output files
+13:13:41,615   INFO ProjectView:142 - scenario RiMEA 6 OSM finished
+13:13:41,685   INFO VadereProject:302 - SimulationResult{scenarioName='"RiMEA 6 OSM", nr_overlaps (PID4)=0, state='"SimulationRun completed"}
+13:13:41,689   INFO ScenarioRun:261 - Simulation of scenario RiMEA 6 OSM finished.
+13:13:41,689   INFO ProjectView:588 - selected scenario 'RiMEA 6 OSM'
+13:13:41,814   INFO ProjectView:594 - repainted output table
+13:13:45,842   INFO ActionCloseApplication:28 - closing application...
+13:53:54,370   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+13:53:54,370   INFO VadereApplication:25 - starting Vadere GUI...
+13:53:54,394   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+13:53:56,417   INFO IOVadere:57 - read project: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\vadere.project
+13:53:56,519   INFO IOVadere:67 - analyzed scenario files.
+13:53:57,094   INFO IOVadere:88 - analyzed: 11, migrated: 0, upToDate: 11, notMigratable: 0
+13:53:57,140   INFO IOVadere:93 - project loaded: Kaiserslautern 
+13:53:57,156   INFO ActionLoadProject:113 - refreshed output table - 2
+13:53:57,156   INFO ProjectView:588 - selected scenario 'Chicken test GNM'
+13:53:57,508   INFO DataProcessingView:97 - switch to gui view
+13:53:57,943   INFO ProjectView:594 - repainted output table
+13:53:57,943   INFO ActionLoadProject:117 - selected the first scenario
+13:53:57,951   INFO ActionLoadProject:124 - project 'Kaiserslautern ' loaded.
+13:54:01,975   INFO ProjectView:588 - selected scenario 'RiMEA 6 OSM'
+13:54:02,114   INFO ProjectView:594 - repainted output table
+14:12:13,151   INFO ProjectView:588 - selected scenario 'RiMEA 6 GNM'
+14:12:13,254   INFO ProjectView:594 - repainted output table
+14:12:14,359   INFO ProjectView:588 - selected scenario 'RiMEA 6 SFM'
+14:12:14,472   INFO ProjectView:594 - repainted output table
+14:12:14,986   INFO ProjectView:588 - selected scenario 'RiMEA 6 OSM'
+14:12:15,092   INFO ProjectView:594 - repainted output table
+14:19:37,511   INFO ActionCloseApplication:28 - closing application...
+14:19:41,589   INFO STDOUTERR:15 - Redirect StdOut and StdErr
+14:19:41,589   INFO VadereApplication:25 - starting Vadere GUI...
+14:19:41,604   INFO VadereConfig:66 - Use config file from path C:\Users\hasch\.config\vadere.conf
+14:19:43,659   INFO IOVadere:57 - read project: D:\Studium\Master Robotics Intelligence Cognition (TU-München)\4. Semester\Praktikum\Exercises\Exercise 2\vadere.project
+14:19:43,733   INFO IOVadere:67 - analyzed scenario files.
+14:19:44,322   INFO IOVadere:88 - analyzed: 12, migrated: 0, upToDate: 12, notMigratable: 0
+14:19:44,369   INFO IOVadere:93 - project loaded: Kaiserslautern 
+14:19:44,385   INFO ActionLoadProject:113 - refreshed output table - 2
+14:19:44,385   INFO ProjectView:588 - selected scenario 'Chicken test GNM'
+14:19:44,713   INFO DataProcessingView:97 - switch to gui view
+14:19:45,156   INFO ProjectView:594 - repainted output table
+14:19:45,156   INFO ActionLoadProject:117 - selected the first scenario
+14:19:45,156   INFO ActionLoadProject:124 - project 'Kaiserslautern ' loaded.
+14:19:49,258   INFO ProjectView:588 - selected scenario 'RiMEA 6 OSM Task3'
+14:19:49,366   INFO ProjectView:594 - repainted output table
