@@ -105,7 +105,7 @@ class Scenario(dict):
                 print("Warning: No targets in scenario! Pedestrian will not move!")
             else:
                 print("Warning: Invalid target-Id! Pedestrian will not move!")
-        new_ped["targetIds"].append(target)
+        new_ped["targetIds"].append(int(_target))
         # modify position
         new_ped["position"]["x"] = position[0]
         new_ped["position"]["y"] = position[1]
@@ -113,7 +113,7 @@ class Scenario(dict):
         ped_id = 1
         while ped_id in self.pedetrian_ids:
             ped_id += 1
-        new_ped["attributes"]["id"] = ped_id
+        new_ped["attributes"]["id"] = int(ped_id)
 
         self["scenario"]["topography"]["dynamicElements"].append(new_ped)
         print("Pedestrian {id} has been added at ({x},{y}) with target {t}".format(x=position[0],y=position[1], t=_target, id=ped_id))
