@@ -32,6 +32,9 @@
       "attributes" : {
         "pedestrianOverlapProcessorId" : 3
       }
+    }, {
+      "type" : "org.vadere.simulator.projects.dataprocessing.processor.FootStepGroupIDProcessor",
+      "id" : 5
     } ],
     "isTimestamped" : true,
     "isWriteMetaData" : false
@@ -92,8 +95,9 @@
         }
       },
       "org.vadere.state.attributes.models.AttributesSIRG" : {
-        "infectionsAtStart" : 0,
-        "infectionRate" : 0.01,
+        "infectionsAtStart" : 10,
+        "infectionRate" : 0.1,
+        "recoveryRate" : 0.001,
         "infectionMaxDistance" : 2.0
       }
     },
