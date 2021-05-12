@@ -1,0 +1,1 @@
+Note: The final implementation of our Vadere-Model-Modifications can be found here: https://github.com/Haschtl/MLCMS-SS2021-Group-A-Vadere
