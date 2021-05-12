@@ -57,7 +57,7 @@ def open_multiple():
         plt.legend(loc='upper left')
     plt.show()
 
-def hardcoded_plot():
+def hardcoded_plot_1():
     fig, axs = plt.subplots(4, 3)
     folders = [
         ["C:/GIT/Exercises/Exercise 2/output/Task5_test1_1000peds_p0.01_r0.01","C:/GIT/Exercises/Exercise 2/output/Task5_test1_1000peds_p0.01_r0.02","C:/GIT/Exercises/Exercise 2/output/Task5_test1_1000peds_p0.01_r0.05"],
@@ -85,6 +85,36 @@ def hardcoded_plot():
         ax.label_outer()
     plt.show()
 
+
+def hardcoded_plot_2():
+    fig, axs = plt.subplots(2, 2)
+    folders = [
+        ["C:/GIT/Exercises/Exercise 2/output/Task5_supermarket_personalspace1.2",
+         "C:/GIT/Exercises/Exercise 2/output/Task5_supermarket_personalspace2"],
+        ["C:/GIT/Exercises/Exercise 2/output/Task5_supermarket_personalspace1.2_45peds",
+         "C:/GIT/Exercises/Exercise 2/output/Task5_supermarket_personalspace2_45peds"],
+    ]
+    for idx, row in enumerate(folders):
+        for idx2, folder in enumerate(row):
+            group_counts = create_folder_data(folder)
+            x = group_counts['simTime']
+            s = group_counts['group-s']
+            r = group_counts['group-r']
+            i = group_counts['group-i']
+            print(x)
+            axs[idx, idx2].stackplot(x, i, s, r)
+
+            axs[idx, idx2].set_title(folder.replace(
+                "C:/GIT/Exercises/Exercise 2/output/Task5_supermarket_", "").replace("_", " "))
+
+    for ax in axs.flat:
+        ax.set(xlabel='Timesteps', ylabel='Pedestrians')
+
+    # Hide x labels and tick labels for top plots and y ticks for right plots.
+    for ax in axs.flat:
+        ax.label_outer()
+    plt.show()
+
 root = Tk()
 root.withdraw()
 plt.ioff()  # Plots are shown blocking
@@ -93,4 +123,5 @@ plt.ioff()  # Plots are shown blocking
 # open_step_by_step()
 # open_multiple()
 
-hardcoded_plot()
+# hardcoded_plot_1()
+hardcoded_plot_2()

@@ -1,5 +1,5 @@
 {
-  "name" : "Task5_test3",
+  "name" : "Task5_supermarket_personalspace1.75",
   "description" : "",
   "release" : "1.15",
   "processWriters" : {
@@ -40,7 +40,7 @@
       "type" : "org.vadere.simulator.projects.dataprocessing.processor.FootStepGroupIDProcessor",
       "id" : 5
     } ],
-    "isTimestamped" : true,
+    "isTimestamped" : false,
     "isWriteMetaData" : false
   },
   "scenario" : {
@@ -48,8 +48,8 @@
     "attributesModel" : {
       "org.vadere.state.attributes.models.AttributesOSM" : {
         "stepCircleResolution" : 4,
-        "numberOfCircles" : 1,
-        "optimizationType" : "NELDER_MEAD",
+        "numberOfCircles" : 2,
+        "optimizationType" : "PSO",
         "varyStepDirection" : true,
         "movementType" : "ARBITRARY",
         "stepLengthIntercept" : 0.4625,
@@ -69,7 +69,7 @@
       },
       "org.vadere.state.attributes.models.AttributesPotentialCompactSoftshell" : {
         "pedPotentialIntimateSpaceWidth" : 0.45,
-        "pedPotentialPersonalSpaceWidth" : 1.2,
+        "pedPotentialPersonalSpaceWidth" : 1.75,
         "pedPotentialHeight" : 50.0,
         "obstPotentialWidth" : 0.8,
         "obstPotentialHeight" : 6.0,
@@ -79,7 +79,7 @@
       },
       "org.vadere.state.attributes.models.AttributesFloorField" : {
         "createMethod" : "HIGH_ACCURACY_FAST_MARCHING",
-        "potentialFieldResolution" : 0.1,
+        "potentialFieldResolution" : 0.05,
         "obstacleGridPenalty" : 0.1,
         "targetAttractionStrength" : 1.0,
         "cacheType" : "NO_CACHE",
@@ -99,14 +99,14 @@
         }
       },
       "org.vadere.state.attributes.models.AttributesSIRG" : {
-        "infectionsAtStart" : 2,
-        "infectionRate" : 0.02,
-        "recoveryRate" : 0.01,
+        "infectionsAtStart" : 5,
+        "infectionRate" : 0.005,
+        "recoveryRate" : 1.0E-5,
         "infectionMaxDistance" : 2.0
       }
     },
     "attributesSimulation" : {
-      "finishTime" : 200.0,
+      "finishTime" : 250.0,
       "simTimeStepLength" : 0.4,
       "realTimeSimTimeRatio" : 0.1,
       "writeSimulationData" : true,
@@ -709,7 +709,7 @@
         "spawnAtRandomPositions" : false,
         "spawnAtGridPositionsCA" : false,
         "useFreeSpaceOnly" : true,
-        "targetIds" : [ 25, 28, 34, 18, 33, 22, 16 ],
+        "targetIds" : [ 25, 28, 34, 18, 33, 32, 22, 16 ],
         "groupSizeDistribution" : [ 1.0 ],
         "dynamicElementType" : "PEDESTRIAN",
         "attributesPedestrian" : null
@@ -797,7 +797,7 @@
         "spawnAtRandomPositions" : false,
         "spawnAtGridPositionsCA" : false,
         "useFreeSpaceOnly" : true,
-        "targetIds" : [ 27, 28, 29, 34, 23, 16 ],
+        "targetIds" : [ 27, 28, 29, 34, 31, 23, 16 ],
         "groupSizeDistribution" : [ 1.0 ],
         "dynamicElementType" : "PEDESTRIAN",
         "attributesPedestrian" : null
@@ -819,7 +819,7 @@
         "spawnAtRandomPositions" : false,
         "spawnAtGridPositionsCA" : false,
         "useFreeSpaceOnly" : true,
-        "targetIds" : [ 26, 28, 34, 19, 20, 24, 16 ],
+        "targetIds" : [ 26, 28, 34, 19, 32, 24, 16 ],
         "groupSizeDistribution" : [ 1.0 ],
         "dynamicElementType" : "PEDESTRIAN",
         "attributesPedestrian" : null
