@@ -1,10 +1,12 @@
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
-# from matplotlib import rc
-# rc('text', usetex=True)
+
 
 def arrowed_spines(ax=None, arrowLength=10, labels=('$x_1$', '$x_2$'), arrowStyle='<|-'):
+    """
+    add arrows to matplotlib axis
+    """
     xlabel, ylabel = labels
 
     for i, spine in enumerate(['left', 'bottom']):
@@ -33,15 +35,19 @@ def arrowed_spines(ax=None, arrowLength=10, labels=('$x_1$', '$x_2$'), arrowStyl
                         ha='center', va=va, arrowprops=arrowprops)
     return xarrow, yarrow
 
-def A_alpha(alpha:float):
-    return np.array([[alpha,alpha],[-0.25,0]])
 
 def step(A_alpha, X):
+    """
+    Calculates A*x; Shape(A_alpha): 2x2, Shape(X): 2xN
+    """
     return np.array([A_alpha[0][0]*X[0]+A_alpha[0][0]*X[1], A_alpha[1][0]*X[0]+A_alpha[1][1]*X[1]])
     # return A_alpha.dot(X)
 
 
 def plot(ax: plt.axes, x, y, u, v, eigenvalues, trajectory, pause=0.2, title=""):
+    """
+    Plot x, y, u and v using streamplot including a trajectory
+    """
     ax[0].spines['left'].set_color('none')
     ax[0].spines['bottom'].set_color('none')
     ax[0].spines['right'].set_color('none')
@@ -66,7 +72,11 @@ def plot(ax: plt.axes, x, y, u, v, eigenvalues, trajectory, pause=0.2, title="")
 
     ax[1].plot(trajectory[:, 0], trajectory[:, 1])
 
+
 def interp(x1,x2,v1,v2,x):
+    """
+    2D Interpolation for velocity calculation 
+    """
     v = np.nan
     f1 = interpolate.interp2d(x1,x2,v1)
     f2 = interpolate.interp2d(x1,x2,v2)
@@ -74,6 +84,9 @@ def interp(x1,x2,v1,v2,x):
 
 
 def create_trajectory(x1, x2, v1, v2, x0=None, delta=1, iterations=1000):
+    """
+    Calculates a trajectory in 2D space starting from x0 using Euler's method
+    """
     if x0 is None:
         x0 = 0.00001*np.random.rand(2)-0.00005
     trajectory = [x0]
@@ -84,9 +97,14 @@ def create_trajectory(x1, x2, v1, v2, x0=None, delta=1, iterations=1000):
         trajectory.append(trajectory[-1]+delta*v)
     return np.array(trajectory)
 
+
 def main(ax, A_alpha, x0, range=[[-1,1],[-1,1]], resolution=[10,10], title=""):
+    """
+    Main function to generate plots for different A_alpha matrices and a specified X-range
+    """
     eig, v = np.linalg.eig(A_alpha)
-    print("Eigenvalues of A_alpha: {}".format(eig))
+    print("Eigenvalues of A_alpha: {}, Determinant: {}, Trace: {}".format(
+        eig, np.linalg.det(A_alpha), np.trace(A_alpha)))
     x1 = np.linspace(range[0][0], range[0][1], num=resolution[0])
     x2 = np.linspace(range[1][0], range[1][1], num=resolution[1])
 
@@ -111,7 +129,7 @@ if __name__ == "__main__":
         "Node, unstable":   {"A": np.array([[alpha, 0], [0, 2*alpha]]), "x0":np.array([-0.1,0.1])},
         "Focus, unstable":  {"A": np.array([[alpha, alpha], [-alpha, alpha]]), "x0":None},
     }
-    if False:
+    if input("Show Animation? [y/N]: ").lower() == "y":
         plt.ion()
         fig, ax = plt.subplots(1, 2)
         m = "Node, stable"
