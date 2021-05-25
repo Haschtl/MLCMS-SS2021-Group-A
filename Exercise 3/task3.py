@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import interpolate
 import matplotlib.pyplot as plt
 from task1 import arrowed_spines, create_trajectory
 
