@@ -29,6 +29,9 @@ def subtask2(check_with_external_library=False):
 
 
 def part2dataset(n=1000) -> np.ndarray:
+    """
+    Create the dataset for subtask 2
+    """
     def x_k(u, v):
         return np.array([u*np.cos(u), v, u*np.sin(u)])
     dataset = np.zeros([n, 3])

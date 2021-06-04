@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import csv
 from task2_diffusionmap import diffusion_map, plot_dmaps
 
 def subtask3():
@@ -53,7 +52,11 @@ def plot_vadere_paths(data, n=2):
     fig.set_size_inches(8, 8)
     fig.savefig('task2_subtask3_2.png', dpi=100)
 
+
 def load_vadere_data(filepath):
+    """
+    Create the dataset for subtask 1
+    """
     array = np.genfromtxt(filepath, delimiter=' ')
     print(array.shape)
     trajectories = []

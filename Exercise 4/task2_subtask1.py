@@ -13,6 +13,9 @@ def subtask1():
 
 
 def part1dataset(n=1000) -> np.ndarray:
+    """
+    Create the dataset for subtask 1
+    """
     def x_k(k, n):
         t_k = (2*np.pi*k)/(n+1)
         return t_k, np.array([np.cos(t_k), np.sin(t_k)])

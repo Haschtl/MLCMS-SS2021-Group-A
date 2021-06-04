@@ -3,11 +3,26 @@ from matplotlib import pyplot as plt
 
 
 def distance_matrix(matrix: np.ndarray):
+    """
+    Input: n*m
+    Computes the distance matrix of a n*m matrix.
+    n is the number of samples, m the dimension (e.g. 2 or 3)
+
+    Output-shape: n*n
+    """
     m, n = np.meshgrid(matrix, matrix)
     return np.sum(np.abs(matrix[:, None] - matrix[None, :]), axis=-1)
 
 
 def diagonal_normalization_matrix(matrix: np.ndarray):
+    """
+    Input: 
+        - matrix (n*m)
+    Computes the diagonal normalization matrix:
+    Diagonal elements represent the sum of their row.
+    Returns: 
+        - Diagonal matrix (n*m)
+    """
     diag = np.zeros(matrix.shape)
     for i, row in enumerate(matrix):
         rowsum = np.sum(row, 0)
@@ -16,6 +31,16 @@ def diagonal_normalization_matrix(matrix: np.ndarray):
 
 
 def diffusion_map(matrix, l=5):
+    """
+    Input:
+        - matrix (n*m)
+        - l (int): The number of eigenvalue/eigenfunction pairs.
+
+    Computes eigenvalues and eigenfunctions of the input matrix with the diffusion map algorithm.
+    Returns: 
+        - Eigenvalues    (l)
+        - Eigenfunctions (n*l)
+    """
     # 1. Form a distance matrix D
     D = distance_matrix(matrix)
 
@@ -56,10 +81,16 @@ def diffusion_map(matrix, l=5):
     phi_l = np.dot(q_pow, v_l)
 
     # Return eigenvalues and eigenvectors
-    return lambda_l[:l+1], phi_l[:, :l+1]
+    return lambda_l[:l], phi_l[:, :l]
 
 
 def plot_dmaps(dmap, name):
+    """
+    Input:
+        - dmap: list of Eigenfunctions
+        - name: Name for plot filename
+    Plots each eigenfunction over each other
+    """
     fig, ax = plt.subplots(dmap.shape[1]-1, dmap.shape[1]-1)
     for i in range(dmap.shape[1]):
         for j in range(dmap.shape[1]):
