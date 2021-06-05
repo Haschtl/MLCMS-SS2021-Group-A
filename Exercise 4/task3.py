@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from task3_model import train
 
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
 # VAE MNIST Example from https://keras.io/examples/generative/vae/
 # not from https://gist.github.com/danijar/1cb4d81fed37fd06ef60d08c1181f557 as it's for tensorflow@1.0
 

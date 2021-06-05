@@ -97,14 +97,16 @@ default_params = {
 }
 
 def train(params):
-    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-    # mnist_digits = np.concatenate([x_train, x_test], axis=0)
-    x_train = np.expand_dims(x_train, -1).astype("float32") / 255
-    x_test = np.expand_dims(x_test, -1).astype("float32") / 255
+    
+    with tf.device("/gpu:0"):
+        (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+        # mnist_digits = np.concatenate([x_train, x_test], axis=0)
+        x_train = np.expand_dims(x_train, -1).astype("float32") / 255
+        x_test = np.expand_dims(x_test, -1).astype("float32") / 255
 
-    e = encoder(params)
-    d = decoder(params)
-    vae = VAE(e, d)
-    vae.compile(optimizer=keras.optimizers.Adam(learning_rate=params["learning_rate"]))
+        e = encoder(params)
+        d = decoder(params)
+        vae = VAE(e, d)
+        vae.compile(optimizer=keras.optimizers.Adam(learning_rate=params["learning_rate"]))
     vae.fit(x_train, epochs=params["epochs"], batch_size=params["batch_size"])
     return vae, x_train, y_train, x_test, y_test

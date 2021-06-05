@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from task2_diffusionmap import diffusion_map, plot_dmaps
-
+from task1_pca import pca
 
 def subtask2(check_with_external_library=False):
     swiss_roll = part2dataset(n=5000)
@@ -26,6 +26,11 @@ def subtask2(check_with_external_library=False):
         lambda_l, phi_l = diffusion_map(swiss_roll_small, l=10)
         # plot_dmaps(phi_l, "task2_subtask2_eigenfunctions")
         plot_subtask2(phi_l, "eigenfunctions_n1000")
+
+    pc_coordinates, u, s, vh = pca(swiss_roll)
+    plot_subtask2(pc_coordinates, "pca_n5000")
+    pc_coordinates, u, s, vh = pca(swiss_roll_small)
+    plot_subtask2(pc_coordinates, "pca_n1000")
 
 
 def part2dataset(n=1000) -> np.ndarray:
