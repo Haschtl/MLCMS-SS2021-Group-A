@@ -3,3 +3,5 @@ Exercise 0
 __pycache__
 */.vscode/
 */.ipynb_checkpoints/
+*.pdf
+*.png

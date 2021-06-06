@@ -1,16 +1,7 @@
-input("Tensorflow v2.5 and tensorflow-probability is required! Press Enter to continue...")
-import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from task3_model import train
-
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-
-# VAE MNIST Example from https://keras.io/examples/generative/vae/
-# not from https://gist.github.com/danijar/1cb4d81fed37fd06ef60d08c1181f557 as it's for tensorflow@1.0
-
-def download_mnist_dataset():
-    return tf.keras.datasets.mnist.load_data()
+# from task3_model import train_mnist
+from task3_model2 import train_mnist
 
 
 def plot_latent_space(vae, n=30, figsize=15):
@@ -64,14 +55,23 @@ def plot_label_clusters(vae, data, labels):
 if __name__ == "__main__":
     plt.ion()
     params = {
-        "epochs": 30,
-        "batch_size": 128,
-        "latent_dim": 2,
+        "input_shape": [28, 28],
         "learning_rate": 0.001,
+        "latent_dim": 2,
+        "encoder_units": 256,
+        "decoder_units": 256,
+
+        "epochs": 100,
+        "batch_size": 128,
+        "iterations": 60,
+
+        "continuous_tests": False,
+        "test_after_epochs": [0, 1, 5, 25, 50, 100],
+        "num_samples": 15,
     }
-    vae, x_train, y_train, x_test, y_test = train(params)
-    plot_latent_space(vae, )
-    plot_label_clusters(vae, x_train, y_train)
+    vae, x_train, y_train, x_test, y_test = train_mnist(params)
+    # plot_latent_space(vae, )
+    # plot_label_clusters(vae, x_train, y_train)
     plt.ioff()
     plt.show()
     # (x_train, y_train), (x_test, y_test) = download_mnist_dataset()

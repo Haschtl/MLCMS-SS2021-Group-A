@@ -1,3 +1,4 @@
+input("Tensorflow v2.5 and tensorflow-probability is required! Press Enter to continue...")
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -96,7 +97,7 @@ default_params = {
     "learning_rate": 0.001,
 }
 
-def train(params):
+def train_mnist(params):
     
     with tf.device("/gpu:0"):
         (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
