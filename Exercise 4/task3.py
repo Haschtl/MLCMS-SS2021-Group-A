@@ -72,8 +72,8 @@ def train_latent_dim(latent_dim):
 
 if __name__ == "__main__":
     plt.ion()
-    train_latent_dim(2)
-    train_latent_dim(32)
+    latent_dim = int(input("Enter the latent dimension for the VAE (e.g. 2 or 32): "))
+    train_latent_dim(latent_dim)
     plt.ioff()
     plt.show()
     # plot_latent_space(vae, )

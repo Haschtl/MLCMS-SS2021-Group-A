@@ -46,12 +46,17 @@ def part2dataset(n=1000) -> np.ndarray:
     return dataset
 
 
-def plot_swissroll(swiss_roll, name):
+def swissroll_color(swiss_roll):
     R = np.sqrt(swiss_roll[:, 0]**2 + swiss_roll[:, 2]**2)
     R = R/np.amax(R)
+    return R
+
+
+def plot_swissroll(swiss_roll, name):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(swiss_roll[:, 0], swiss_roll[:, 1], swiss_roll[:, 2], c=R)
+    ax.scatter(swiss_roll[:, 0], swiss_roll[:, 1],
+               swiss_roll[:, 2], c=swissroll_color(swiss_roll))
     plt.show()
     plt.pause(0.5)
     plt.axis('tight')

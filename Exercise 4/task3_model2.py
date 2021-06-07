@@ -32,7 +32,7 @@ def plot_loss_history(fig, ax, data):
   # plt.show()
   plt.pause(0.1)
 
-def plot_latent_space(ax, epoch, codes, labels, ):
+def plot_latent_space_2d(ax, epoch, codes, labels, ):
   ax.scatter(codes[:, 0], codes[:, 1], s=2, c=labels, alpha=0.1)
   ax.set_aspect('equal')
   ax.set_xlim(codes.min() - .1, codes.max() + .1)
@@ -40,6 +40,21 @@ def plot_latent_space(ax, epoch, codes, labels, ):
   ax.set_title('Epoch {}'.format(epoch))
   ax.set_xlabel('Latent dim 1')
   ax.set_ylabel('Latent dim 2')
+  ax.tick_params(
+      axis='both', which='both', left='off', bottom='off',
+      labelleft='off', labelbottom='off')
+
+
+def plot_latent_space_3d(ax, epoch, codes, labels, ):
+  ax.scatter(codes[:, 0], codes[:, 1], codes[:, 2],s=2, c=labels, alpha=0.1)
+  ax.set_aspect('auto')
+  ax.set_xlim(codes.min() - .1, codes.max() + .1)
+  ax.set_ylim(codes.min() - .1, codes.max() + .1)
+  ax.set_zlim(codes.min() - .1, codes.max() + .1)
+  ax.set_title('Epoch {}'.format(epoch))
+  ax.set_xlabel('Latent dim 1')
+  ax.set_ylabel('Latent dim 2')
+  ax.set_zlabel('Latent dim 3')
   ax.tick_params(
       axis='both', which='both', left='off', bottom='off',
       labelleft='off', labelbottom='off')
@@ -71,11 +86,15 @@ def plot_generated_samples(ax, generated_samples):
 
 def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_samples, generated_samples, num_samples):
   fig = plt.figure(figsize=(6,10))
-  if (params["latent_dim"]==2):
+  if (params["latent_dim"] == 2 or params["latent_dim"] == 3):
     columns=5
     rows = 3+3+1+1
-    ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
-                          colspan=columns, rowspan=columns)
+    if params["latent_dim"] == 2:
+      ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
+                            colspan=columns, rowspan=columns)
+    else:
+      ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
+                             colspan=columns, rowspan=columns, projection='3d')
     yoffset = columns
   else:
     columns = 5
@@ -92,7 +111,9 @@ def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_sam
       *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+8, i)) for i in range(columns)],
   ]
   if (params["latent_dim"] == 2):
-    plot_latent_space(ax1, epoch, codes, labels)
+    plot_latent_space_2d(ax1, epoch, codes, labels)
+  if (params["latent_dim"] == 3):
+    plot_latent_space_3d(ax1, epoch, codes, labels)
   ax2[2].set_title("Reconstructed samples")
   plot_reconstructed_samples(ax2, original_samples, reconstructed_samples)
   ax3[2].set_title("Generated samples", pad=20)
@@ -186,7 +207,7 @@ class vae():
           plot_epoch(epoch, self.params, test_codes, dataset.test.labels, feed[self.data], reconstructed_samples, 
                      test_samples, self.params["num_samples"])
     
-    loss_figure.savefig('task3_L_elbo.png', dpi=100)
+    loss_figure.savefig('task3_L_elbo_latentdim{}.png'.format(self.params["latent_dim"]), dpi=100)
     plt.ioff()
 
 def train_mnist(params):
