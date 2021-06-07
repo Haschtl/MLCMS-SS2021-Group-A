@@ -10,33 +10,103 @@ from tensorflow.examples.tutorials.mnist import input_data
 tfd = tf.contrib.distributions
 
 
+def concat_images(imga, imgb):
+  """
+  Combines two color image ndarrays side-by-side.
+  """
+  ha, wa = imga.shape[:2]
+  hb, wb = imgb.shape[:2]
+  max_height = np.max([ha, hb])
+  total_width = wa+wb
+  new_img = np.zeros(shape=(max_height, total_width))
+  new_img[:ha, :wa] = imga
+  new_img[:hb, wa:wa+wb] = imgb
+  return new_img
+
+def plot_loss_history(fig, ax, data):
+  ax.clear()
+  ax.plot(data)
+  ax.set_xlabel("Epoch")
+  ax.set_ylabel("$L_{ELBO}$")
+  fig.canvas.draw()
+  # plt.show()
+  plt.pause(0.1)
+
 def plot_latent_space(ax, epoch, codes, labels, ):
   ax.scatter(codes[:, 0], codes[:, 1], s=2, c=labels, alpha=0.1)
   ax.set_aspect('equal')
   ax.set_xlim(codes.min() - .1, codes.max() + .1)
   ax.set_ylim(codes.min() - .1, codes.max() + .1)
-  ax.set_ylabel('Epoch {}'.format(epoch))
+  ax.set_title('Epoch {}'.format(epoch))
+  ax.set_xlabel('Latent dim 1')
+  ax.set_ylabel('Latent dim 2')
   ax.tick_params(
       axis='both', which='both', left='off', bottom='off',
       labelleft='off', labelbottom='off')
 
 
-def plot_samples(ax, samples):
-  for index, sample in enumerate(samples):
-    ax[index].imshow(sample, cmap='gray')
-    ax[index].axis('off')
+def plot_reconstructed_samples(ax, original_samples, reconstructed_samples):
+  # print(original_samples)
+  # print(reconstructed_samples)
+  for idx, sample in enumerate(reconstructed_samples):
+    # ax[idx].imshow(sample, cmap='gray')
+    try:
+      ax[idx].imshow(concat_images(original_samples[idx], sample), cmap='gray')
+      ax[idx].axis('off')
+    except Exception:
+      pass
 
 
-def plot_epoch(epoch, codes, labels, samples, num_samples):
-  fig, ax = plt.subplots(
-      nrows=3, ncols=num_samples, figsize=(10, 20))
-  plot_latent_space(ax[0,0], epoch, codes, labels)
-  plot_samples(ax[1,:], samples)
+def plot_generated_samples(ax, generated_samples):
+  # print(original_samples)
+  # print(reconstructed_samples)
+  for idx, sample in enumerate(generated_samples):
+    # ax[idx].imshow(sample, cmap='gray')
+    try:
+      ax[idx].imshow(sample, cmap='gray')
+      ax[idx].axis('off')
+    except Exception:
+      pass
+  
+
+def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_samples, generated_samples, num_samples):
+  fig = plt.figure(figsize=(6,10))
+  if (params["latent_dim"]==2):
+    columns=5
+    rows = 3+3+1+1
+    ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
+                          colspan=columns, rowspan=columns)
+    yoffset = columns
+  else:
+    columns = 5
+    rows = 3+3+1+1
+    yoffset = 0
+  ax2 = [
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+2, i)) for i in range(columns)],
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+3, i)) for i in range(columns)],
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+4, i)) for i in range(columns)],
+  ]
+  ax3 = [
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+6, i)) for i in range(columns)],
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+7, i)) for i in range(columns)],
+      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+8, i)) for i in range(columns)],
+  ]
+  if (params["latent_dim"] == 2):
+    plot_latent_space(ax1, epoch, codes, labels)
+  ax2[2].set_title("Reconstructed samples")
+  plot_reconstructed_samples(ax2, original_samples, reconstructed_samples)
+  ax3[2].set_title("Generated samples", pad=20)
+  plot_generated_samples(ax3, generated_samples)
+  plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+  # fig.tight_layout()
   plt.show()
   plt.pause(0.2)
+  fig.savefig('task3_epoch{}_latentdim{}.png'.format(epoch, params["latent_dim"]), dpi=100)
 
 class vae():
   def __init__(self, params):
+    self._decoder_standard_deviation = tf.Variable(1., trainable=True)
+    # self._decoder_standard_deviation = tf.make_template('dsd',decoder_standard_deviation)
     make_encoder = tf.make_template('encoder', self.make_encoder)
     make_decoder = tf.make_template('decoder', self.make_decoder)
 
@@ -45,17 +115,19 @@ class vae():
     # Define the model.
     self.prior = self.make_prior(params)
     self.posterior = make_encoder(self.data, params)
-    self.code = self.posterior.sample()
+    self.latent_space = self.posterior.sample()
 
     # Define the loss.
-    likelihood = make_decoder(
-        self.code, params).log_prob(self.data)
+    samples2 = make_decoder(
+        self.latent_space, params)
+    self.likelihood = samples2.log_prob(self.data)
     divergence = tfd.kl_divergence(self.posterior, self.prior)
-    self.elbo = tf.reduce_mean(likelihood - divergence)
+    self.elbo = tf.reduce_mean(self.likelihood - divergence)
     self.optimizer = tf.compat.v1.train.AdamOptimizer(
         params["learning_rate"]).minimize(-self.elbo)
 
-    self.generated_samples = make_decoder(
+    self.samples2 = samples2.mean()
+    self.samples = make_decoder(
         self.prior.sample(params["num_samples"]), params).mean()
 
 
@@ -74,13 +146,13 @@ class vae():
     return tfd.MultivariateNormalDiag(loc, scale)
 
 
-  def make_decoder(self, code, params):
-    x = code
+  def make_decoder(self, latent_space, params):
+    x = latent_space
     x = tf.layers.dense(x, params["decoder_units"], tf.nn.relu)
     x = tf.layers.dense(x, params["decoder_units"], tf.nn.relu)
     logit = tf.layers.dense(x, np.prod(params["input_shape"]))
     logit = tf.reshape(logit, [-1] + params["input_shape"])
-    return tfd.Independent(tfd.Normal(logit, 1.0), 2)
+    return tfd.Independent(tfd.Normal(logit, self._decoder_standard_deviation), 2)
     # return tfd.Independent(tfd.Bernoulli(logit), 2)
 
   def train(self, dataset):
@@ -89,41 +161,35 @@ class vae():
     loss_figure = plt.figure()
     loss_axis = loss_figure.add_subplot(1, 1, 1)
 
-    if self.params["continuous_tests"]:
-      fig, ax = plt.subplots(
-          nrows=self.params["epochs"], ncols=self.params["num_samples"]+1, figsize=(10, 20))
-    
     with tf.train.MonitoredSession() as sess:
-      for epoch in range(self.params["epochs"]):
+      for epoch in range(self.params["epochs"]+1):
+        if epoch != 0:
+          for _ in range(self.params["iterations"]):
+            feed = {self.data: dataset.train.next_batch(
+                self.params["batch_size"])[0].reshape([-1, *self.params["input_shape"]])}
+            sess.run(self.optimizer, feed)
+        
         feed = {self.data: dataset.test.images.reshape([-1, *self.params["input_shape"]])}
         test_elbo, test_codes, test_samples = sess.run(
-            [self.elbo, self.code, self.generated_samples], feed)
-        print('Epoch', epoch, 'elbo', test_elbo)
-        
-        loss_axis.clear()
+            [self.elbo, self.latent_space, self.samples], feed)
+        print('Epoch {}; Elbo: {}'.format(epoch, test_elbo))
+
+        feed = {self.data: dataset.test.images.reshape(
+            [-1, *self.params["input_shape"]])}
+        _, _, reconstructed_samples = sess.run(
+            [self.elbo, self.latent_space, self.samples2], feed)
+
         loss_history.append(test_elbo)
-        loss_axis.plot(loss_history)
-        loss_figure.canvas.draw()
-        plt.pause(0.1)
+        plot_loss_history(loss_figure, loss_axis, loss_history)
         
-        if self.params["continuous_tests"]:
-          plot_latent_space(ax[epoch, 0], epoch, test_codes, dataset.test.labels)
-          plot_samples(ax[epoch, 1:], test_samples)
-
         if epoch in self.params["test_after_epochs"]:
-          plot_epoch(epoch, test_codes, dataset.test.labels, test_samples, self.params["num_samples"])
-
-        for _ in range(self.params["iterations"]):
-          feed = {self.data: dataset.train.next_batch(
-              self.params["batch_size"])[0].reshape([-1, *self.params["input_shape"]])}
-          sess.run(self.optimizer, feed)
+          plot_epoch(epoch, self.params, test_codes, dataset.test.labels, feed[self.data], reconstructed_samples, 
+                     test_samples, self.params["num_samples"])
     
-    if self.params["continuous_tests"]:
-      plt.savefig('task3_training.png', dpi=300, transparent=True, bbox_inches='tight')
+    loss_figure.savefig('task3_L_elbo.png', dpi=100)
     plt.ioff()
 
 def train_mnist(params):
-  #  missing: replace Bernoulli
   mnist = input_data.read_data_sets('MNIST_data/')
   model = vae(params)
   model.train(mnist)
@@ -133,16 +199,15 @@ def train_mnist(params):
 default_params = {
     "input_shape": [28, 28],
     "learning_rate": 0.001,
-    "latent_dim": 2,
+    "latent_dim": 32,
     "encoder_units": 256,
     "decoder_units": 256,
 
-    "epochs": 100,
+    "epochs": 500,
     "batch_size": 128,
     "iterations": 60,
 
-    "continuous_tests": False,
-    "test_after_epochs": [0,1,5,25,50,100],
+    "test_after_epochs": [1,5,25,50,100,150,200,250,300,350,400,450,500],
     "num_samples": 15,
 }
 
