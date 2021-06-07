@@ -8,6 +8,9 @@ from task2_subtask2 import part2dataset, swissroll_color
 
 
 def bonus_task(n=1000):
+    """
+    Load the swissroll dataset and perform datafold analysis
+    """
     X = part2dataset(n)
     X_color = swissroll_color(X)
 

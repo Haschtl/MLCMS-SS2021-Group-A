@@ -4,6 +4,9 @@ from task2_diffusionmap import diffusion_map, plot_dmaps
 
 
 def subtask3():
+    """
+    Execute subtask 3
+    """
     trajectories, data = load_vadere_data("data_DMAP_PCA_vadere.txt")
     plot_vadere_paths(trajectories)
 

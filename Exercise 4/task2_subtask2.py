@@ -4,6 +4,9 @@ from task2_diffusionmap import diffusion_map, plot_dmaps
 from task1_pca import pca
 
 def subtask2(check_with_external_library=False):
+    """
+    Execute subtask 2
+    """
     swiss_roll = part2dataset(n=5000)
     swiss_roll_small = part2dataset(n=1000)
 
@@ -47,12 +50,18 @@ def part2dataset(n=1000) -> np.ndarray:
 
 
 def swissroll_color(swiss_roll):
+    """
+    Calculate colors for swiss-roll depending on the distance from zero (dim 0 and 2)
+    """
     R = np.sqrt(swiss_roll[:, 0]**2 + swiss_roll[:, 2]**2)
     R = R/np.amax(R)
     return R
 
 
 def plot_swissroll(swiss_roll, name):
+    """
+    Plot swissroll in 3d
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(swiss_roll[:, 0], swiss_roll[:, 1],

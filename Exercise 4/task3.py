@@ -53,6 +53,9 @@ from task3_model2 import train_mnist
 
 
 def train_latent_dim(latent_dim):
+    """
+    Train the VAE with the MNIST dataset with the specified latent dimension
+    """
     params = {
         "input_shape": [28, 28],
         "learning_rate": 0.001,

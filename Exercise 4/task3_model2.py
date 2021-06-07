@@ -24,6 +24,9 @@ def concat_images(imga, imgb):
   return new_img
 
 def plot_loss_history(fig, ax, data):
+  """
+  Plot the L_ELBO history over epochs
+  """
   ax.clear()
   ax.plot(data)
   ax.set_xlabel("Epoch")
@@ -33,6 +36,9 @@ def plot_loss_history(fig, ax, data):
   plt.pause(0.1)
 
 def plot_latent_space_2d(ax, epoch, codes, labels, ):
+  """
+  Plot a 2 dimensional latent space
+  """
   ax.scatter(codes[:, 0], codes[:, 1], s=2, c=labels, alpha=0.1)
   ax.set_aspect('equal')
   ax.set_xlim(codes.min() - .1, codes.max() + .1)
@@ -46,6 +52,9 @@ def plot_latent_space_2d(ax, epoch, codes, labels, ):
 
 
 def plot_latent_space_3d(ax, epoch, codes, labels, ):
+  """
+  Plot a 3 dimensional latent space
+  """
   ax.scatter(codes[:, 0], codes[:, 1], codes[:, 2],s=2, c=labels, alpha=0.1)
   ax.set_aspect('auto')
   ax.set_xlim(codes.min() - .1, codes.max() + .1)
@@ -61,6 +70,9 @@ def plot_latent_space_3d(ax, epoch, codes, labels, ):
 
 
 def plot_reconstructed_samples(ax, original_samples, reconstructed_samples):
+  """
+  Plot reconstructed samples next to the original ones
+  """
   # print(original_samples)
   # print(reconstructed_samples)
   for idx, sample in enumerate(reconstructed_samples):
@@ -73,6 +85,9 @@ def plot_reconstructed_samples(ax, original_samples, reconstructed_samples):
 
 
 def plot_generated_samples(ax, generated_samples):
+  """
+  Plot generated samples
+  """
   # print(original_samples)
   # print(reconstructed_samples)
   for idx, sample in enumerate(generated_samples):
@@ -85,6 +100,10 @@ def plot_generated_samples(ax, generated_samples):
   
 
 def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_samples, generated_samples, num_samples):
+  """
+  Combined plot 
+  executable after each epoch
+  """
   fig = plt.figure(figsize=(6,10))
   if (params["latent_dim"] == 2 or params["latent_dim"] == 3):
     columns=5
@@ -124,7 +143,11 @@ def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_sam
   plt.pause(0.2)
   fig.savefig('task3_epoch{}_latentdim{}.png'.format(epoch, params["latent_dim"]), dpi=100)
 
+
 class vae():
+  """
+  The Variational auto encoder model. 
+  """
   def __init__(self, params):
     self._decoder_standard_deviation = tf.Variable(1., trainable=True)
     # self._decoder_standard_deviation = tf.make_template('dsd',decoder_standard_deviation)
@@ -153,6 +176,9 @@ class vae():
 
 
   def make_encoder(self, data, params):
+    """
+    Create the encoder model with 2 dense layers 
+    """
     x = tf.layers.flatten(data)
     x = tf.layers.dense(x, params["encoder_units"], tf.nn.relu)
     x = tf.layers.dense(x, params["encoder_units"], tf.nn.relu)
@@ -160,14 +186,18 @@ class vae():
     scale = tf.layers.dense(x, params["latent_dim"], tf.nn.softplus)
     return tfd.MultivariateNormalDiag(loc, scale)
 
-
   def make_prior(self, params):
+    """
+    Create the prior with multivariate normal diagonal distribution 
+    """
     loc = tf.zeros(params["latent_dim"])
     scale = tf.ones(params["latent_dim"])
     return tfd.MultivariateNormalDiag(loc, scale)
 
-
   def make_decoder(self, latent_space, params):
+    """
+    Create the decoder model with 2 dense layers 
+    """
     x = latent_space
     x = tf.layers.dense(x, params["decoder_units"], tf.nn.relu)
     x = tf.layers.dense(x, params["decoder_units"], tf.nn.relu)
@@ -177,6 +207,9 @@ class vae():
     # return tfd.Independent(tfd.Bernoulli(logit), 2)
 
   def train(self, dataset):
+    """
+    Train the model on the given dataset (MNIST) and plot results 
+    """
     plt.ion()
     loss_history = []
     loss_figure = plt.figure()
@@ -210,7 +243,11 @@ class vae():
     loss_figure.savefig('task3_L_elbo_latentdim{}.png'.format(self.params["latent_dim"]), dpi=100)
     plt.ioff()
 
+
 def train_mnist(params):
+  """
+  Load the MNIST-dataset and train the VAE on it.
+  """
   mnist = input_data.read_data_sets('MNIST_data/')
   model = vae(params)
   model.train(mnist)

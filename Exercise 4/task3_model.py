@@ -1,3 +1,7 @@
+"""
+Alternative Variational Auto Encoder implemented in Tensorflow 2.5 using convolutional layers.
+"""
+
 input("Tensorflow v2.5 and tensorflow-probability is required! Press Enter to continue...")
 import numpy as np
 import tensorflow as tf

@@ -4,6 +4,9 @@ from task2_diffusionmap import diffusion_map
 
 
 def subtask1():
+    """
+    Execute subtask 1
+    """
     part1_t_k, part1_dataset = part1dataset(n=1000)
     _, part1_eigenfunctions = diffusion_map(part1_dataset, l=5)
     plot_subtask1(part1_t_k, part1_dataset, part1_eigenfunctions)
