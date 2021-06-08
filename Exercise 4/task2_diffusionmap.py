@@ -91,14 +91,24 @@ def plot_dmaps(dmap, name):
         - name: Name for plot filename
     Plots each eigenfunction over each other
     """
-    fig, ax = plt.subplots(dmap.shape[1]-1, dmap.shape[1]-1)
-    for i in range(dmap.shape[1]):
-        for j in range(dmap.shape[1]):
-            if i >= j:
+    rows = dmap.shape[1]-1
+    cols = dmap.shape[1]-1
+    fig, ax = plt.subplots(rows, cols)
+    for i in range(rows):
+        for j in range(cols):
+            # ax[i,j].clear()
+            if i > j:
+                ax[i, j].axis('off')
                 continue
-            ax[i, j-1].scatter(dmap[:, i], dmap[:, j], s=(72./fig.dpi)**2)
-            ax[i, j-1].set_xlabel("$\phi_{}$".format(i+1))
-            ax[i, j-1].set_ylabel("$\phi_{}$".format(j+1))
+            if i == j:
+                ax[i, j].set_xlabel("$\phi_{}$".format("{"+str(i+1)+"}"))
+                ax[i, j].set_ylabel("$\phi_{}$".format("{"+str(j+2)+"}"))
+            # ax[i, j-1].axis('off')
+            ax[i, j].set_xticks([])
+            ax[i, j].set_yticks([])
+            ax[i, j].scatter(dmap[:, i], dmap[:, j+1], s=(72./fig.dpi)**2)
+            # ax[i, j-1].set_xlabel("$\phi_{}$".format(i+1))
+            # ax[i, j-1].set_ylabel("$\phi_{}$".format(j+1))
     plt.show()
     plt.pause(0.5)
     fig.set_size_inches(8, 8)

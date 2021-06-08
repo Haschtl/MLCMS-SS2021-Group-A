@@ -12,7 +12,10 @@ def subtask1():
     plot_subtask1(part1_t_k, part1_dataset, part1_eigenfunctions)
 
     # fft = np.fft.fft(part1_dataset)
-    # print(fft)
+    # plt.plot(part1_t_k, fft)
+    # # plt.plot(part1_t_k, fft[:,1])
+    # # print(fft[:,0],fft[:,1])
+    # plt.show()
 
 
 def part1dataset(n=1000) -> np.ndarray:
