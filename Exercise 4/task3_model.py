@@ -54,7 +54,7 @@ def plot_latent_space_1d(ax, epoch, codes, labels, ):
   """
   Plot a 1 dimensional latent space
   """
-  ax.scatter(codes[:, 0], np.ones(codes[:, 0].shape), s=2, c=labels, alpha=0.1)
+  ax.scatter(codes, np.ones(codes.shape), s=2, c=labels, alpha=0.1)
   # ax.set_aspect('equal')
   ax.set_xlim(codes.min() - .1, codes.max() + .1)
   # ax.set_ylim(codes.min() - .1, codes.max() + .1)
