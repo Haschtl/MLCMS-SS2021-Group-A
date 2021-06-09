@@ -5,13 +5,13 @@ import tensorflow as tf
 from tensorflow.contrib.learn.python.learn.datasets import base
 
 from task4_dataset import DataSet
-from task3_model2 import vae
+from task3_model import vae
 
 
 
 class FireEvacDataset:
     """
-    Class to create dataset used by task3_model2.py
+    Class to create dataset used by task3_model.py
     """
 
     def __init__(self, testset, trainset):
@@ -25,7 +25,7 @@ class FireEvacDataset:
 
 class Dataset:
     """
-    Class to create dataset used by task3_model2.py
+    Class to create dataset used by task3_model.py
     """
 
     def __init__(self, file):
