@@ -5,7 +5,6 @@ input("Tensorflow v1.15 and python3.7 or lower is required! Press Enter to conti
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
 
 tfd = tf.contrib.distributions
 
@@ -49,6 +48,38 @@ def plot_latent_space_2d(ax, epoch, codes, labels, ):
   ax.tick_params(
       axis='both', which='both', left='off', bottom='off',
       labelleft='off', labelbottom='off')
+
+
+def plot_latent_space_1d(ax, epoch, codes, labels, ):
+  """
+  Plot a 1 dimensional latent space
+  """
+  ax.scatter(codes[:, 0], np.ones(codes[:, 0].shape), s=2, c=labels, alpha=0.1)
+  # ax.set_aspect('equal')
+  ax.set_xlim(codes.min() - .1, codes.max() + .1)
+  # ax.set_ylim(codes.min() - .1, codes.max() + .1)
+  ax.set_title('Epoch {}'.format(epoch))
+  ax.set_xlabel('Latent dim 1')
+  ax.tick_params(
+      axis='x', which='both', left='off', bottom='off',
+      labelleft='off', labelbottom='off')
+
+
+def plot_latent_space_2d(ax, epoch, codes, labels, ):
+  """
+  Plot a 2 dimensional latent space
+  """
+  ax.scatter(codes[:, 0], codes[:, 1], s=2, c=labels, alpha=0.1)
+  ax.set_aspect('equal')
+  ax.set_xlim(codes.min() - .1, codes.max() + .1)
+  ax.set_ylim(codes.min() - .1, codes.max() + .1)
+  ax.set_title('Epoch {}'.format(epoch))
+  ax.set_xlabel('Latent dim 1')
+  ax.set_ylabel('Latent dim 2')
+  ax.tick_params(
+      axis='both', which='both', left='off', bottom='off',
+      labelleft='off', labelbottom='off')
+
 
 
 def plot_latent_space_3d(ax, epoch, codes, labels, ):
@@ -97,51 +128,86 @@ def plot_generated_samples(ax, generated_samples):
       ax[idx].axis('off')
     except Exception:
       pass
-  
+
+
+def plot_reconstructed_samples_task4(fig, ax, original_samples, reconstructed_samples):
+  """
+  Plot reconstructed samples next to the original ones
+  """
+  ax.scatter(original_samples[:, 0],
+             original_samples[:, 1], s=(72./fig.dpi)**2)
+  ax.scatter(reconstructed_samples[:, 0],
+             reconstructed_samples[:, 1], s=(72./fig.dpi)**2)
+
+
+def plot_generated_samples_task4(fig, ax, generated_samples):
+  """
+  Plot generated samples
+  """
+  ax.scatter(generated_samples[:, 0],
+             generated_samples[:, 1], s=(72./fig.dpi)**2)
 
 def plot_epoch(epoch, params, codes, labels, original_samples, reconstructed_samples, generated_samples, num_samples):
   """
   Combined plot 
   executable after each epoch
   """
+  task=3
   fig = plt.figure(figsize=(6,10))
-  if (params["latent_dim"] == 2 or params["latent_dim"] == 3):
+  if (params["latent_dim"] <= 3):
     columns=5
     rows = 3+3+1+1
-    if params["latent_dim"] == 2:
-      ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
-                            colspan=columns, rowspan=columns)
-    else:
+    if params["latent_dim"] == 3:
       ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
                              colspan=columns, rowspan=columns, projection='3d')
+    else:
+      ax1 = plt.subplot2grid((columns+rows+1, columns), (1, 0),
+                            colspan=columns, rowspan=columns)
     yoffset = columns
   else:
     columns = 5
     rows = 3+3+1+1
     yoffset = 0
-  ax2 = [
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+2, i)) for i in range(columns)],
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+3, i)) for i in range(columns)],
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+4, i)) for i in range(columns)],
-  ]
-  ax3 = [
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+6, i)) for i in range(columns)],
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+7, i)) for i in range(columns)],
-      *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+8, i)) for i in range(columns)],
-  ]
+  if (params["latent_dim"] == 2):
+    plot_latent_space_1d(ax1, epoch, codes, labels)
   if (params["latent_dim"] == 2):
     plot_latent_space_2d(ax1, epoch, codes, labels)
   if (params["latent_dim"] == 3):
     plot_latent_space_3d(ax1, epoch, codes, labels)
-  ax2[2].set_title("Reconstructed samples")
-  plot_reconstructed_samples(ax2, original_samples, reconstructed_samples)
-  ax3[2].set_title("Generated samples", pad=20)
-  plot_generated_samples(ax3, generated_samples)
+
+  if params["input_shape"][0] == params["input_shape"][1]:
+    ax2 = [
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+2, i)) for i in range(columns)],
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+3, i)) for i in range(columns)],
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+4, i)) for i in range(columns)],
+    ]
+    ax3 = [
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+6, i)) for i in range(columns)],
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+7, i)) for i in range(columns)],
+        *[plt.subplot2grid((yoffset+rows+1, columns), (yoffset+8, i)) for i in range(columns)],
+    ]
+  
+    ax2[2].set_title("Reconstructed samples")
+    ax3[2].set_title("Generated samples", pad=20)
+    plot_reconstructed_samples(ax2, original_samples, reconstructed_samples)
+    plot_generated_samples(ax3, generated_samples)
+  else:
+    # this is for task 4
+    task=4
+    ax2 = plt.subplot2grid((yoffset+rows+1, columns),
+                           (yoffset+2, 0), colspan=columns, rowspan=3)
+    ax3 = plt.subplot2grid((yoffset+rows+1, columns),
+                           (yoffset+6, 0), colspan=columns, rowspan=3)
+    ax2.set_title("Reconstructed samples")
+    ax3.set_title("Generated samples", pad=20)
+    plot_reconstructed_samples_task4(fig, ax2, original_samples, reconstructed_samples)
+    plot_generated_samples_task4(fig, ax3, generated_samples)
+
   plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
   # fig.tight_layout()
   plt.show()
   plt.pause(0.2)
-  fig.savefig('task3_epoch{}_latentdim{}.png'.format(epoch, params["latent_dim"]), dpi=100)
+  fig.savefig('task{}_epoch{}_latentdim{}.png'.format(task, epoch, params["latent_dim"]), dpi=100)
 
 
 class vae():
@@ -248,6 +314,7 @@ def train_mnist(params):
   """
   Load the MNIST-dataset and train the VAE on it.
   """
+  from tensorflow.examples.tutorials.mnist import input_data
   mnist = input_data.read_data_sets('MNIST_data/')
   model = vae(params)
   model.train(mnist)
