@@ -1,45 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
 
 from tensorflow.contrib.learn.python.learn.datasets import base
 
 from task4_dataset import DataSet
 from task3_model import vae
 
-
-
-class FireEvacDataset:
-    """
-    Class to create dataset used by task3_model.py
-    """
-
-    def __init__(self, testset, trainset):
-        self.train = Dataset(testset)
-        self.test = Dataset(trainset)
-        # self.train = tf.data.Dataset.from_tensor_slices(
-        #     rescale(np.load(testset)))
-        # self.test = tf.data.Dataset.from_tensor_slices(
-        #     rescale(np.load(trainset)))
-
-
-class Dataset:
-    """
-    Class to create dataset used by task3_model.py
-    """
-
-    def __init__(self, file):
-        images = rescale(np.load(file))
-        labels = np.zeros(images.shape[0])
-        self.images = tf.data.Dataset.from_tensor_slices(images)
-        self.labels = tf.data.Dataset.from_tensor_slices(labels)
-
+def create_labels(testset, trainset):
+    from sklearn.cluster import KMeans
+    
+    k = 4
+    X = [*testset,*trainset]
+    kmeans = KMeans(n_clusters=k, random_state=0).fit(X).labels_
+    # idx = np.argsort(kmeans.cluster_centers_.sum(axis=1))
+    # lut = np.zeros_like(idx)
+    # lut[idx] = np.arange(k)
+    testlabels = kmeans[:testset.shape[0]]
+    trainlabels = kmeans[testset.shape[0]:]
+    return testlabels, trainlabels
 
 def load_fireevac_dataset(testset, trainset):
     test_images = rescale(np.load(testset))
-    test_labels = np.zeros(test_images.shape[0])
     train_images = rescale(np.load(trainset))
-    train_labels = np.zeros(train_images.shape[0])
+    try:
+        test_labels, train_labels = create_labels(test_images, train_images)
+    except Exception:
+        input("Please install sklearn for visualization of clusters. Press ENTER to continue")
+        test_labels = np.zeros(test_images.shape[0])
+        train_labels = np.zeros(train_images.shape[0])
     train = DataSet(train_images, train_labels)
     validation = DataSet(np.array([]), np.array([]))
     test = DataSet(test_images, test_labels)
@@ -59,9 +47,9 @@ def rescale(array):
 def visualize_dataset(dataset):
     fig = plt.figure()
     plt.scatter(dataset.test.images[:, 0],
-                dataset.test.images[:, 1], s=(72./fig.dpi)**2)
+                dataset.test.images[:, 1], s=(72./fig.dpi)**2, c=dataset.test.labels)
     plt.scatter(dataset.train.images[:, 0],
-                dataset.train.images[:, 1], s=(72./fig.dpi)**2)
+                dataset.train.images[:, 1], s=(72./fig.dpi)**2, c=dataset.train.labels)
     plt.title("FireEval dataset (train and test set)")
     plt.ylabel("$y$ (scaled to $[0;1]$)")
     plt.xlabel("$x$ (scaled to $[0;1]$)")
