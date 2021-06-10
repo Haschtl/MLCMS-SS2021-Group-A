@@ -1,26 +1,18 @@
-from scipy.interpolate import Rbf
 import numpy as np
-from scipy import linalg
-from scipy.spatial.distance import cdist, pdist, squareform
 from matplotlib import pyplot as plt
+from scipy import linalg
+from scipy.spatial.distance import cdist
 
-
-def load_data(filepath):
-    """
-    Load the data from text-file to numpy array
-    """
-    data = np.genfromtxt(filepath, delimiter=' ')
-    return data
-
-
-def sort(data):
-    """
-    Sort data on x-axis (first axis)
-    """
-    return data[np.lexsort((data[:, 1], data[:, 0]))]
+from helper import InteractiveMode, show_and_save, load_data, sort
 
 
 def approximate_linear_function(data, cond=None, order=1):
+    """
+    Simple leastsquare approximation for approximation of (nearly) linear functions
+    data: x,y data: [x,y]   shape: (N * 2)
+    cond: Cut-off ratio for small singular values of a. For the purposes of rank determination, singular values are treated as zero if they are smaller than rcond times the largest singular value of a
+    """
+    assert order==1 # order should approximate functions of higher order, but this fails and is not part of the exercise
     A = np.vstack([data[:,0], 1*np.ones((order, len(data[:,0])))]).T
     m, residuals, rank, s = np.linalg.lstsq(A, data[:,1], rcond=cond)
     print("Sums of squared residuals: {}".format(residuals))
@@ -44,17 +36,26 @@ def approximate_nonlinear_function(x, y, xi, epsilon=1, smooth=0.0, norm="euclid
 
 
 def calc_radial_coefficients(x, y, epsilon=1, smooth=0.0, norm="euclidean"):
-    phi_X = radial_basis(x,x,epsilon,norm)
-    phi_X = phi_X - np.eye(x.shape[-1])*smooth
-    c = linalg.solve(phi_X, y)
+    """
+    Approximate the coefficients C
+    """
+    phi_x = radial_basis(x,x,epsilon,norm)
+    phi_x = phi_x - np.eye(x.shape[-1])*smooth
+    c = linalg.solve(phi_x, y)
     return c
 
 def interpolate_radial_function(xi, x, c, epsilon=1, norm="euclidean"):
+    """
+    Calculate yi for xi
+    """
     phi = radial_basis(xi, x, epsilon, norm)
     return np.dot(phi, c)
 
 
 def radial_basis(x_l, x, epsilon, norm="euclidean"):
+    """
+    Calculates the radial basis for vector x
+    """
     r = cdist(np.array([x_l]).T, np.array([x]).T, norm)
     return _radial_basis(r, epsilon)
 
@@ -76,6 +77,9 @@ def _radial_basis(r, epsilon):
 
 
 def compare_linear_approximation(data, m, name="1", title=""):
+    """
+    Create a plot to present results of linear approximation 
+    """
     x = data[:, 0]
     y = data[:, 1]
     order = len(m)
@@ -89,7 +93,7 @@ def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title="
     """
     Compare the input data with the fitted function
     """
-    fig, ax = plt.subplots(2,1)
+    _, ax = plt.subplots(2,1)
     ax[0].plot(x, y, "o", label="Original data", markersize=2)
     ax[0].plot(x_approx, y_approx, label="Fitted line")
     ax[0].set_xlabel("$x$")
@@ -100,7 +104,7 @@ def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title="
         error = y-y_approx
     if error is not None:
         ax[1].plot(x, error, "o", label="Error", markersize=2)
-        ax[1].plot(x_approx, y_approx-y_approx, label="Fitted line")
+        ax[1].plot(x_approx, np.zeros(y_approx.shape), label="Fitted line")
         ax[1].set_title("Error")
         ax[1].set_xlabel("$x$")
         ax[1].set_ylabel("$\Delta y$")
@@ -109,33 +113,6 @@ def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title="
     plt.tight_layout()
     show_and_save("task1_approx_{}".format(name))
 
-
-def show_and_save(name):
-    """
-    Show and save matplotlib figure. Made for interactive mode (will call plt.pause())0
-    """
-    plt.show()
-    plt.pause(0.2)
-    plt.savefig(name+".png", dpi=200)
-
-
-class InteractiveMode():
-    """ 
-    Wrapper for matplotlib interactive mode.
-    Use it like this:
-    with InteractiveMode():
-        plt.plot(x,y)
-        plt.show()
-        plt.figure()
-        plt.plot(x,y)
-        ...
-    """
-    def __enter__(self):
-        plt.ion()
-  
-    def __exit__(self, exception_type, exception_value, traceback):
-        plt.ioff()
-        plt.show()
 
 
 def part1():
@@ -156,7 +133,6 @@ def part3():
     xi = np.linspace(
         np.min(nonlinear_data[:, 0])*1.0, np.max(nonlinear_data[:, 0])*1.0, 2000)
     for epsilon in [0.005, 0.05, 0.5, 1, 2, 3, 5, 10]:
-        # epsilon = 2  # 0.0005
         yi, error = approximate_nonlinear_function(
             nonlinear_data[:, 0], nonlinear_data[:, 1], xi, epsilon=epsilon)
         compare_approxiation(
@@ -177,7 +153,6 @@ def extras():
     xi = np.linspace(
         np.min(linear_data[:, 0])*1.0, np.max(linear_data[:, 0])*1.0, 2000)
     for epsilon in [0.005, 0.05, 0.5, 1, 2, 3, 5, 10]:
-        # epsilon = 1  # 0.0005
         yi, error = approximate_nonlinear_function(
             linear_data[:, 0], linear_data[:, 1], xi, epsilon=epsilon)
         compare_approxiation(
@@ -191,3 +166,12 @@ if __name__ == "__main__":
         part3()
         extras()
         
+# Questions:
+# Why is it not a good idea to use the radial basis function for dataset A?
+# - A is very linear
+# - Extrapolation is wrong
+# - One unnecessary parameter, which can destroy the approximation
+# 
+# Why chose epsilon=3?:
+# - Higher epsilon: Unstable behaviour
+# - Lower epsilon: more and more ausreisser in approximation
