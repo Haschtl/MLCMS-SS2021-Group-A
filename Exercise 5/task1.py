@@ -12,9 +12,9 @@ def approximate_linear_function(data, cond=None, order=1):
     data: x,y data: [x,y]   shape: (N * 2)
     cond: Cut-off ratio for small singular values of a. For the purposes of rank determination, singular values are treated as zero if they are smaller than rcond times the largest singular value of a
     """
-    assert order==1 # order should approximate functions of higher order, but this fails and is not part of the exercise
-    A = np.vstack([data[:,0], 1*np.ones((order, len(data[:,0])))]).T
-    m, residuals, rank, s = np.linalg.lstsq(A, data[:,1], rcond=cond)
+    assert order == 1  # order should approximate functions of higher order, but this fails and is not part of the exercise
+    A = np.vstack([data[:, 0], 1*np.ones((order, len(data[:, 0])))]).T
+    m, residuals, rank, s = np.linalg.lstsq(A, data[:, 1], rcond=cond)
     print("Sums of squared residuals: {}".format(residuals))
     return m
 
@@ -39,10 +39,11 @@ def calc_radial_coefficients(x, y, epsilon=1, smooth=0.0, norm="euclidean"):
     """
     Approximate the coefficients C
     """
-    phi_x = radial_basis(x,x,epsilon,norm)
+    phi_x = radial_basis(x, x, epsilon, norm)
     phi_x = phi_x - np.eye(x.shape[-1])*smooth
     c = linalg.solve(phi_x, y)
     return c
+
 
 def interpolate_radial_function(xi, x, c, epsilon=1, norm="euclidean"):
     """
@@ -62,7 +63,7 @@ def radial_basis(x_l, x, epsilon, norm="euclidean"):
 
 def _radial_basis(r, epsilon):
     # return np.sqrt((r/epsilon)**2+1) # multiquadric
-    return np.exp(-(r/epsilon)**2) # gaussian
+    return np.exp(-(r/epsilon)**2)  # gaussian
     # return r # linear (similar to taylor decomposition)
     # return r**3 # cubic
     # return r**5 # quintic
@@ -87,13 +88,14 @@ def compare_linear_approximation(data, m, name="1", title=""):
     for a in range(order):
         part = m[order-1-a]*x**a
         approx = approx+part
-    compare_approxiation(x,y,x,approx, None, name, title)
+    compare_approxiation(x, y, x, approx, None, name, title)
+
 
 def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title=""):
     """
     Compare the input data with the fitted function
     """
-    _, ax = plt.subplots(2,1)
+    _, ax = plt.subplots(2, 1)
     ax[0].plot(x, y, "o", label="Original data", markersize=2)
     ax[0].plot(x_approx, y_approx, label="Fitted line")
     ax[0].set_xlabel("$x$")
@@ -114,7 +116,6 @@ def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title="
     show_and_save("task1_approx_{}".format(name))
 
 
-
 def part1():
     linear_data = sort(load_data("linear_function_data.txt"))
     m1 = approximate_linear_function(linear_data)
@@ -125,7 +126,8 @@ def part1():
 def part2():
     nonlinear_data = sort(load_data("nonlinear_function_data.txt"))
     m1 = approximate_linear_function(nonlinear_data)
-    compare_linear_approximation(nonlinear_data, m1, name="part2_nonlinear", title="Nonlinear data, Linear approximation")
+    compare_linear_approximation(
+        nonlinear_data, m1, name="part2_nonlinear", title="Nonlinear data, Linear approximation")
 
 
 def part3():
@@ -165,13 +167,13 @@ if __name__ == "__main__":
         part2()
         part3()
         extras()
-        
+
 # Questions:
 # Why is it not a good idea to use the radial basis function for dataset A?
 # - A is very linear
 # - Extrapolation is wrong
 # - One unnecessary parameter, which can destroy the approximation
-# 
+#
 # Why chose epsilon=3?:
 # - Higher epsilon: Unstable behaviour
 # - Lower epsilon: more and more ausreisser in approximation
