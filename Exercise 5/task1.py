@@ -1,3 +1,4 @@
+from scipy.interpolate import Rbf
 import numpy as np
 from scipy import linalg
 from scipy.spatial.distance import cdist, pdist, squareform
@@ -16,7 +17,7 @@ def sort(data):
     """
     Sort data on x-axis (first axis)
     """
-    return np.sort(data, axis=0)
+    return data[np.lexsort((data[:, 1], data[:, 0]))]
 
 
 def approximate_linear_function(data, cond=None, order=1):
@@ -26,38 +27,31 @@ def approximate_linear_function(data, cond=None, order=1):
     return m
 
 
-# def radial_basis(x,x_l,epsilon):
-#     r = x_l-x
-#     return _radial_basis(r, epsilon)
-
-
-def _radial_basis(r, epsilon):
-    return np.exp(-(r/epsilon)**2)
-
-# def radial_function(x, c_l, x_l, epsilon):
-#     answer = np.zeros(x.shape)
-#     for l in range(c_l.shape[0]):
-#         answer += c_l[l]*radial_basis(x,x_l[l], epsilon)
-#     return answer
-
-
-def find_epsilon(x):
-    xmax = np.amax([x], axis=1)
-    xmin = np.amin([x], axis=1)
-    edges = xmax - xmin
-    edges = edges[np.nonzero(edges)]
-    return np.power(np.prod(edges)/x.shape[-1], 1.0/edges.size)
-
-
-def approximate_radial_function(x, y, newx, epsilon=0.001, smooth=0.0, norm="euclidean"):
+def approximate_nonlinear_function(x, y, xi, epsilon=1, smooth=0.0, norm="euclidean"):
     """
     x: Vector with input x-values
     y: Vector with output y-values
-    n: Number of nodes (randomly selected from xa)
+    xi: New x-coordinates for inter/extrapolation
+    epsilon: parameter for radial basis function
     """
-    nodes,x = calc_radial_nodes(x,y,epsilon, smooth, norm)
-    # print(nodes)
-    return interpolate_radial_function(newx,x,nodes,epsilon,norm)
+    # if not epsilon:
+    #     epsilon = find_epsilon(x)
+    #     print("Calculated epsilon: {}".format(epsilon))
+    c = calc_radial_coefficients(x, y, epsilon, smooth, norm)
+    yi = interpolate_radial_function(xi, x, c, epsilon, norm)
+    error = y-interpolate_radial_function(x, x, c, epsilon, norm)
+    return yi, error
+
+
+def calc_radial_coefficients(x, y, epsilon=1, smooth=0.0, norm="euclidean"):
+    phi_X = radial_basis(x,x,epsilon,norm)
+    phi_X = phi_X - np.eye(x.shape[-1])*smooth
+    c = linalg.solve(phi_X, y)
+    return c
+
+def interpolate_radial_function(xi, x, c, epsilon=1, norm="euclidean"):
+    phi = radial_basis(xi, x, epsilon, norm)
+    return np.dot(phi, c)
 
 
 def radial_basis(x_l, x, epsilon, norm="euclidean"):
@@ -65,39 +59,23 @@ def radial_basis(x_l, x, epsilon, norm="euclidean"):
     return _radial_basis(r, epsilon)
 
 
-def calc_radial_nodes(x, y, epsilon=0.001, smooth=0.0, norm="euclidean"):
-    # rand = np.random.choice(len(x), size=100, replace=False)
-    # x = x[rand]  # select random nodes
-    # y = y[rand]  # select random nodes
-    # # x[rand] = 0
-
-    n = x.shape[-1]
-
-    # xi = np.array([x])
-    # r = pdist(xi.T, norm)
-    # rads = _radial_basis(squareform(r), epsilon)
-    rads = radial_basis(x,x.T,epsilon,norm)
-    
-    A = rads - np.eye(n)*smooth
-    nodes = linalg.solve(A, y)
-    # nodes = np.linalg.lstsq(A,y)
-    
-    return nodes, x
-
-def interpolate_radial_function(newx, x, nodes, epsilon=0.001, norm="euclidean"):
-    # Now calculate for new x-basis
-    # rand = np.random.choice(len(nodes), size=(len(nodes)-100), replace=False)
-    # x = x[rand]  # select random nodes
-    # nodes = nodes[rand]  # select random nodes
-    # # nodes[rand] = 0
-
-    # r = cdist(np.array([newx]).T, np.array([x]).T, norm)
-    # phi = _radial_basis(r, epsilon)
-    phi = radial_basis(newx,x,epsilon,norm)
-    return np.dot(phi, nodes)
+def _radial_basis(r, epsilon):
+    # return np.sqrt((r/epsilon)**2+1) # multiquadric
+    return np.exp(-(r/epsilon)**2) # gaussian
+    # return r # linear (similar to taylor decomposition)
+    # return r**3 # cubic
+    # return r**5 # quintic
 
 
-def compare_linear_approximation(data, m):
+# def find_epsilon(x):
+#     xmax = np.amax([x], axis=1)
+#     xmin = np.amin([x], axis=1)
+#     xrange = xmax - xmin
+#     xrange = xrange[np.nonzero(xrange)]
+#     return np.power(np.prod(xrange)/x.shape[-1], 1.0/xrange.size)
+
+
+def compare_linear_approximation(data, m, name="1", title=""):
     x = data[:, 0]
     y = data[:, 1]
     order = len(m)
@@ -105,9 +83,9 @@ def compare_linear_approximation(data, m):
     for a in range(order):
         part = m[order-1-a]*x**a
         approx = approx+part
-    compare_approxiation(x,y,x,approx)
+    compare_approxiation(x,y,x,approx, None, name, title)
 
-def compare_approxiation(x, y, x_approx, y_approx):
+def compare_approxiation(x, y, x_approx, y_approx, error=None, name="1", title=""):
     """
     Compare the input data with the fitted function
     """
@@ -117,8 +95,11 @@ def compare_approxiation(x, y, x_approx, y_approx):
     ax[0].set_xlabel("$x$")
     ax[0].set_ylabel("$y$")
     ax[0].legend()
+    ax[0].set_title(title)
     if y.shape == y_approx.shape:
-        ax[1].plot(x, y-y_approx, "o", label="Error", markersize=2)
+        error = y-y_approx
+    if error is not None:
+        ax[1].plot(x, error, "o", label="Error", markersize=2)
         ax[1].plot(x_approx, y_approx-y_approx, label="Fitted line")
         ax[1].set_title("Error")
         ax[1].set_xlabel("$x$")
@@ -126,7 +107,7 @@ def compare_approxiation(x, y, x_approx, y_approx):
     else:
         print("Cannot compare difference, x and x_approx need to be equal")
     plt.tight_layout()
-    show_and_save("task1_linearfit")
+    show_and_save("task1_approx_{}".format(name))
 
 
 def show_and_save(name):
@@ -156,33 +137,57 @@ class InteractiveMode():
         plt.ioff()
         plt.show()
 
+
+def part1():
+    linear_data = sort(load_data("linear_function_data.txt"))
+    m1 = approximate_linear_function(linear_data)
+    compare_linear_approximation(
+        linear_data, m1, name="part1_linear", title="Linear data, Linear approximation")
+
+
+def part2():
+    nonlinear_data = sort(load_data("nonlinear_function_data.txt"))
+    m1 = approximate_linear_function(nonlinear_data)
+    compare_linear_approximation(nonlinear_data, m1, name="part2_nonlinear", title="Nonlinear data, Linear approximation")
+
+
+def part3():
+    nonlinear_data = sort(load_data("nonlinear_function_data.txt"))
+    xi = np.linspace(
+        np.min(nonlinear_data[:, 0])*1.0, np.max(nonlinear_data[:, 0])*1.0, 2000)
+    for epsilon in [0.005, 0.05, 0.5, 1, 2, 3, 5, 10]:
+        # epsilon = 2  # 0.0005
+        yi, error = approximate_nonlinear_function(
+            nonlinear_data[:, 0], nonlinear_data[:, 1], xi, epsilon=epsilon)
+        compare_approxiation(
+            nonlinear_data[:, 0], nonlinear_data[:, 1], xi, yi, error, name="part3_nonlinear_epsilon{}".format(epsilon), title="Nonlinear data, $\epsilon ={}$".format(epsilon))
+
+    # cheat = True
+    # if cheat:
+    #     from scipy.interpolate import Rbf
+    #     rbf = Rbf(nonlinear_data[:, 0], nonlinear_data[:, 1],
+    #               function="gaussian", epsilon=epsilon)
+    #     y1 = rbf(xi)
+    #     compare_approxiation(
+    #         nonlinear_data[:, 0], nonlinear_data[:, 1], xi, y1, "Test using scipy")
+
+
+def extras():
+    linear_data = sort(load_data("linear_function_data.txt"))
+    xi = np.linspace(
+        np.min(linear_data[:, 0])*1.0, np.max(linear_data[:, 0])*1.0, 2000)
+    for epsilon in [0.005, 0.05, 0.5, 1, 2, 3, 5, 10]:
+        # epsilon = 1  # 0.0005
+        yi, error = approximate_nonlinear_function(
+            linear_data[:, 0], linear_data[:, 1], xi, epsilon=epsilon)
+        compare_approxiation(
+            linear_data[:, 0], linear_data[:, 1], xi, yi, error, name="extra_linear_epsilon{}".format(epsilon), title="Linear data, $\epsilon ={}$".format(epsilon))
+
+
 if __name__ == "__main__":
     with InteractiveMode():
-        linear_data = sort(load_data("linear_function_data.txt"))
-        nonlinear_data = sort(load_data("nonlinear_function_data.txt"))
-
-        # m1 = approximate_linear_function(linear_data)
-        # compare_linear_approximation(linear_data, m1)
-
-        # m2 = approximate_linear_function(nonlinear_data, order=1)
-        # compare_linear_approximation(nonlinear_data, m2)
-
-        # m2 = approximate_linear_function(nonlinear_data, order=3)
-        # compare_linear_approximation(nonlinear_data, m2)
-
-        x1 = np.linspace(
-            np.min(nonlinear_data[:, 0]), np.max(nonlinear_data[:, 0]), 100).T
-        x1 = nonlinear_data[:, 0]
-        # print(find_epsilon(nonlinear_data[:,0]))
-        y1 = approximate_radial_function(
-            nonlinear_data[:, 0], nonlinear_data[:, 1], x1, epsilon=0.001, smooth=0.0)
-        compare_approxiation(nonlinear_data[:, 0], nonlinear_data[:, 1], x1, y1)
-        
-        # from scipy.interpolate import Rbf
-        # rbf = Rbf(nonlinear_data[:, 0], nonlinear_data[:, 1], function="gaussian",epsilon=0.001, smooth=0.0)
-        # y1 = rbf(x1)
-        # compare_approxiation(nonlinear_data[:, 0], nonlinear_data[:, 1], x1, y1)
-
-        # y1 = approximate_radial_function(linear_data[:,0], linear_data[:,1],linear_data[:,0])
-        # compare_approxiation(linear_data[:, 0], linear_data[:, 1], linear_data[:, 0], y1)
+        part1()
+        part2()
+        part3()
+        extras()
         
