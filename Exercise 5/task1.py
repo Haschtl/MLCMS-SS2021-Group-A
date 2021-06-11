@@ -167,13 +167,3 @@ if __name__ == "__main__":
         part2()
         part3()
         extras()
-
-# Questions:
-# Why is it not a good idea to use the radial basis function for dataset A?
-# - A is very linear
-# - Extrapolation is wrong
-# - One unnecessary parameter, which can destroy the approximation
-#
-# Why chose epsilon=3?:
-# - Higher epsilon: Unstable behaviour
-# - Lower epsilon: more and more ausreisser in approximation
