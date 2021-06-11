@@ -6,10 +6,16 @@ from helper import InteractiveMode, show_and_save, load_data, sort
 
 
 def finite_diff(x0,x1,dt):
+    """
+    Calculate the finite difference of two matrices x0,x1 with timestep dt 
+    """
     return (x1-x0)/dt
 
 
 def plot_vectorfields(*args, labels=[], name="", title=""):
+    """
+    Plot multiple vectorfields (len(args)). Include optional labels, a filename and plot-title
+    """
     marker = ["o","x"]
     plt.figure()
     for idx, arg in enumerate(args):
@@ -26,6 +32,10 @@ def plot_vectorfields(*args, labels=[], name="", title=""):
 
 
 def plot_phase_portrait(A, range=[[-10,10],[-10,10]], resolution=[100,100], trajectory=None, name="phaseportrait", title=""):
+    """
+    Create a phase portrait for matrix A in the given range with a given resolution.
+    Optionally add a trajectory to plot in the phase portrait. Includes a filename and plot-title.
+    """
     x = np.linspace(range[0][0], range[0][1], num=resolution[0])
     y = np.linspace(range[1][0], range[1][1], num=resolution[1])
     xv, yv = np.meshgrid(x, y)
@@ -45,17 +55,11 @@ def plot_phase_portrait(A, range=[[-10,10],[-10,10]], resolution=[100,100], traj
     show_and_save("task2_{}".format(name))
 
 
-def interp(x1, x2, v1, v2, x):  # taken from ex3: task1.py
-    """
-    2D Interpolation for velocity calculation 
-    """
-    v = np.nan
-    f1 = interpolate.interp2d(x1, x2, v1)
-    f2 = interpolate.interp2d(x1, x2, v2)
-    return np.array([f1(x[0], x[1])[0], f2(x[0], x[1])[0]])
-
-
 def create_trajectory(x0,A, dt, t_end):
+    """
+    Creates a trajectory for matrix x0 with A until it reaches t_end (with timestep dt)
+    Returns a list of positions with same shape as x0
+    """
     t = 0
     x = [np.copy(x0)]
     while t < t_end:
