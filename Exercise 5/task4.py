@@ -36,7 +36,8 @@ def lorenz(x_0=np.array([10,10,10]), sigma=10,beta=8/3, phi=28, T_end=1000, T_st
     Parameters
     ----------
     x_0 : (1, 3) ndarray, optional
-        Starting point of Lorenz Attractor. Default: np.array([10,10,10])
+        Starting point of Lorenz Attractor. Default: 
+        np.array([10,10,10])
     sigma : float, optional
         Sigma parameter of the Lorenz Attractor. Default: 10
     beta : float, optional
@@ -51,7 +52,8 @@ def lorenz(x_0=np.array([10,10,10]), sigma=10,beta=8/3, phi=28, T_end=1000, T_st
     Returns
     -------
     X : (N, 3) ndarray
-        Points of Lorenz Attractor in 3-D space with given(or default) parameters.
+        Points of Lorenz Attractor in 3-D space with given(or default) 
+        parameters.
     """
     X = [x_0]
     for _t in range(int(T_end/T_step)):
