@@ -184,6 +184,6 @@ if __name__ == "__main__":
     # remove header and burn-in period of first 1000 time steps
     mi_timesteps = mi_timesteps[1001:]
     with InteractiveMode():
-        # part1(mi_timesteps)
+        part1(mi_timesteps)
         part2(mi_timesteps)
-        # part3(dt=1)
+        part3(dt=1)
