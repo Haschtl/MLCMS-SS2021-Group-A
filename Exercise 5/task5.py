@@ -104,7 +104,7 @@ def scatter_3d_data(x, y, z, name="", labels=["x", "y", "z"], title="", c=None, 
     ax.set_xlabel(labels[0])
     ax.set_ylabel(labels[1])
     ax.set_zlabel(labels[2])
-    cb = plt.colorbar(sc)
+    cb = plt.colorbar(sc, pad=0.1)
     cb.set_ticks([0,20,40,60,80,100,120,140,160,180,200])
     show_and_save("task5_{}".format(name))
 
@@ -184,6 +184,6 @@ if __name__ == "__main__":
     # remove header and burn-in period of first 1000 time steps
     mi_timesteps = mi_timesteps[1001:]
     with InteractiveMode():
-        part1(mi_timesteps)
+        # part1(mi_timesteps)
         part2(mi_timesteps)
-        part3(dt=1)
+        # part3(dt=1)
