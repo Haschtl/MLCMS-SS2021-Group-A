@@ -166,6 +166,7 @@ def part3(dt=1):
     # load data in principal component coordinates and use only first three components (2d+1=3)
     pc_coordinates = np.load('pc_coordinates.npy')
     pc_coordinates = pc_coordinates[:,:3]
+
     # Shift data in principal component coordinates by 1
     shifted_coords = np.roll(pc_coordinates, -dt, axis=0)
     # substracting data from its shifted version gives us velocity in each time step
@@ -177,6 +178,9 @@ def part3(dt=1):
     # plot a single period
     plot_data(np.arange(0, one_period.shape[0],1), one_period, name="3_2", labels=["Arc length", "velocity"])
     plt.locator_params(axis='x', nbins=4)
+
+    # arclengths = [np.sum(one_period[:i]) for i in range(one_period.shape[0])]
+    # plot_data(np.arange(0, one_period.shape[0],1), arclengths, name="3_3", labels=["Time", "Arc length"])
 
 
 if __name__ == "__main__":

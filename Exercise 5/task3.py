@@ -28,6 +28,19 @@ def linear_vf(x0, x1, dt, A):
     mse = ((x[-1] - x1)**2).mean(axis=0)
     print("Mean squared error: {}".format(mse))
 
+def nonlinear_vf(x0, x1, yi):
+    plt.figure()
+    plt.quiver(x0[:,0], x0[:,1], x1[:,0], yi)
+
+    plt.title("Vector field generated with RBF")
+    plt.xlabel("$x$")
+    plt.ylabel("$y$")
+    show_and_save("task3_{}".format("nonlinear_vf"))
+
+    # Compute the mean squared error
+    mse = ((np.array(list(zip(x1[:,0],yi))) - x1)**2).mean(axis=0)
+    print("Mean squared error: {}".format(mse))
+
 if __name__ == "__main__":
     nonlinear_vectorfield_x0 = load_data("nonlinear_vectorfield_data_x0.txt")
     nonlinear_vectorfield_x1 = load_data("nonlinear_vectorfield_data_x1.txt")
@@ -43,5 +56,7 @@ if __name__ == "__main__":
 
     yi, error = task1.approximate_nonlinear_function(nonlinear_vectorfield_x0[:,0], nonlinear_vectorfield_x0[:,1], nonlinear_vectorfield_x1[:,0], epsilon=5)
     #mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean()
-    mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean(axis=0)
-    print(mse)
+    # mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean(axis=0)
+    # print(mse)
+
+    nonlinear_vf(nonlinear_vectorfield_x0, nonlinear_vectorfield_x1, yi)
