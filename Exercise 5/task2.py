@@ -91,7 +91,7 @@ def part2(x0, x1, dt, A):
         x1, *x[1:], labels=["$x_1$", "$x_1$ (approx)"], name="part2_approximation", title="Approximated x1")
 
     # Compute the mean squared error to x1
-    mse = ((x[-1] - x1)**2).mean(axis=0)/len(x0)
+    mse = ((x[-1] - x1)**2).mean(axis=0)
     print("Mean squared error: {}".format(mse))
 
 

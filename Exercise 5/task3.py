@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import Rbf
+# from scipy.interpolate import RBFInterpolator
 # from scipy.spatial.distance import cdist
 # from scipy.linalg import solve
 from sklearn.metrics import mean_squared_error
@@ -24,7 +25,7 @@ def linear_vf(x0, x1, dt, A):
     show_and_save("task3_{}".format("linear_vf"))
 
     # Compute the mean squared error to x1
-    mse = ((x[-1] - x1)**2).mean(axis=0)/len(x0)
+    mse = ((x[-1] - x1)**2).mean(axis=0)
     print("Mean squared error: {}".format(mse))
 
 if __name__ == "__main__":
@@ -38,7 +39,9 @@ if __name__ == "__main__":
     A = task2.part1(nonlinear_vectorfield_x0, nonlinear_vectorfield_x1, dt)
     print(A)
     linear_vf(nonlinear_vectorfield_x0, nonlinear_vectorfield_x1, dt, A)
+    
 
-    # yi, error = task1.approximate_nonlinear_function(nonlinear_vectorfield_x0[:,0], nonlinear_vectorfield_x1[:,1], nonlinear_vectorfield_x1[:,0])
-    # mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean()
-    # print(mse)
+    yi, error = task1.approximate_nonlinear_function(nonlinear_vectorfield_x0[:,0], nonlinear_vectorfield_x0[:,1], nonlinear_vectorfield_x1[:,0], epsilon=5)
+    #mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean()
+    mse = ((yi - nonlinear_vectorfield_x1[:,1])**2).mean(axis=0)
+    print(mse)
