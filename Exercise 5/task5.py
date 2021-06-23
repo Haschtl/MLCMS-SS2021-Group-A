@@ -155,7 +155,7 @@ def part2(data):
 
 def part3(dt=1):
     """
-    Create a velocity-arclenght plot from the curve in in principal 
+    Create a velocity-arclength plot from the curve in in principal 
     component coordinates.
 
     Parameters
