@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 from matplotlib import pyplot as plt
 
-from helper import InteractiveMode, show_and_save, load_data, sort
+from helper import InteractiveMode, matprint, show_and_save, load_data, sort
 
 
 def finite_diff(x0,x1,dt):
@@ -78,6 +78,8 @@ def part1(x0, x1, dt, cond=None):
     # Then approximate the 2x2 matrix A: v^(k)=Ax_0^(k)
     A, residuals, rank, s = np.linalg.lstsq(x0, v, rcond=cond)  # x0 @ A = v
     print("Sums of squared residuals: {}".format(residuals))
+    print("A:")
+    matprint(A)
     return A
 
 
