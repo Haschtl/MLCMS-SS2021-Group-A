@@ -1,4 +1,4 @@
-import os
+# import os
 
 from image_preprocessing import process_images
 from model import train
@@ -10,9 +10,10 @@ from analysis import analyze_model
 # Download dataset first:
 # https://drive.google.com/file/d/16dhJn7k4FWVwByRsQAEpl9lwjuV03jVI/view
 
-if not os.path.exists("data/part_A_final/train_data/ground"):
-    print("Images have not been preprocessed yet... doing this now.")
-    process_images()
+# if not os.path.exists("data/part_A_final/train_data/ground"):
+#     print("Images have not been preprocessed yet... doing this now.")
+print("Preprocessing images (skipping all files that have already been processed)")
+process_images()
 
 show_sample("data/part_A_final/train_data/images/IMG_101.jpg")
 

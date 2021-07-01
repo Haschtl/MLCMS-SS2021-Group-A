@@ -1,46 +1,56 @@
+import os
 import scipy.io as io
 import numpy as np
 from matplotlib import pyplot as plt
 import scipy
 from tqdm import tqdm
 
-from data import get_image_paths, write_output
+from data import get_image_paths, write_output, imagepath2groundpath
 
 
 def process_images():
+    '''
+    Preprocesses all data from the ShanghaiTech dataset 
+    '''
     img_paths = get_image_paths()
     for img_path in tqdm(img_paths):
         process_image(img_path)
 
 
-def process_image(img_path):
+def process_image(img_path:str):
+    '''
+    Creates density-maps of pedestrians from the sparse matrix provided by the dataset
+    The output-files are written to data/*/*/ground/...
+    '''
     # Load sparse matrix
-    mat = io.loadmat(img_path.replace('.jpg', '.mat').replace(
-        'images', 'ground_truth').replace('IMG_', 'GT_IMG_'))
+    if not os.path.exists(imagepath2groundpath(img_path)):
+        mat = io.loadmat(img_path.replace('.jpg', '.mat').replace(
+            'images', 'ground_truth').replace('IMG_', 'GT_IMG_'))
 
-    # Read image
-    img = plt.imread(img_path)
+        # Read image
+        img = plt.imread(img_path)
 
-    # Create a zero matrix of image size
-    k = np.zeros((img.shape[0], img.shape[1]))
+        # Create a zero matrix of image size
+        k = np.zeros((img.shape[0], img.shape[1]))
 
-    gt = mat["image_info"][0, 0][0, 0][0]
+        gt = mat["image_info"][0, 0][0, 0][0]
 
-    # Generate hot encoded matrix of sparse matrix
-    for i in range(0, len(gt)):
-        if int(gt[i][1]) < img.shape[0] and int(gt[i][0]) < img.shape[1]:
-            k[int(gt[i][1]), int(gt[i][0])] = 1
+        # Generate hot encoded matrix of sparse matrix
+        for i in range(0, len(gt)):
+            if int(gt[i][1]) < img.shape[0] and int(gt[i][0]) < img.shape[1]:
+                k[int(gt[i][1]), int(gt[i][0])] = 1
 
-    # generate density map
-    k = gaussian_filter_density(k)
+        # generate density map
+        k = gaussian_filter_density(k)
 
-    # File path to save density map
-    write_output(k, img_path)
+        # File path to save density map
+        write_output(k, img_path)
 
 
 def gaussian_filter_density(gt):
-    # Generates a density map using Gaussian filter transformation
-
+    '''
+    Generates a density map using Gaussian filter transformation
+    '''
     density = np.zeros(gt.shape, dtype=np.float32)
 
     gt_count = np.count_nonzero(gt)

@@ -69,7 +69,7 @@ def save_model(model, filename: str, weightsname: str = None):
         json_file.write(model_json)
 
 
-def imagepath2groundpath(path):
+def imagepath2groundpath(path:str):
     '''
     Loads an image-path and returns the corresponding groundtruth path
 
@@ -81,7 +81,7 @@ def imagepath2groundpath(path):
     return path.replace('.jpg', '.h5').replace('images', 'ground')
 
 
-def groundpath2imagepath(path):
+def groundpath2imagepath(path:str):
     '''
     Loads a groundtruth-path and returns the corresponding image-path 
 
@@ -93,7 +93,7 @@ def groundpath2imagepath(path):
     return path.replace('.h5', '.jpg').replace('ground', 'images')
 
 
-def get_input(path):
+def get_input(path:str):
     '''
     Loads an image, scales it to [0,1] and applies a color-filter
 
@@ -117,7 +117,7 @@ def get_input(path):
     return im
 
 
-def get_output(path):
+def get_output(path:str):
     '''
     Loads groundtruth data
 
@@ -141,7 +141,7 @@ def get_output(path):
         return None, None
 
 
-def write_output(density, file_path):
+def write_output(density, file_path:str):
     '''
     Writes a density-map to the output
     '''

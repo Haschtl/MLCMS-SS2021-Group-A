@@ -5,7 +5,7 @@ import numpy as np
 from data import get_image_paths, load_model, get_input, get_output
 
 
-def analyze_model(modelname):
+def analyze_model(modelname:str):
     model = load_model(modelname)
     img_paths = get_image_paths()
 

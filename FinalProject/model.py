@@ -8,6 +8,7 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.models import Sequential, model_from_json
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tensorflow.keras import backend as K
+from tensorflow.python.keras.engine.base_layer import Layer
 
 
 from data import get_image_paths, get_input, get_output, save_model, model_folder, weights_folder
@@ -22,7 +23,7 @@ defaultOptions = {
     },
     "lossfunction": "euclidean-distance",
     "train_options": {
-        "batch_size": None,
+        "batch_size": 1,
         "epochs": 1,
         "steps_per_epoch": 700
     },
@@ -33,7 +34,12 @@ defaultOptions = {
 }
 
 
-def train(modelname="Model", options=None):
+def train(modelname:str="Model", options:dict=None):
+    '''
+    Main training function for the model.
+    Specify a name for the model (required for filenames).
+    Specify options like the defaultOptions above.
+    '''
     if options is None:
         options = defaultOptions
     else:
@@ -43,7 +49,7 @@ def train(modelname="Model", options=None):
     model = CrowdNet(options["model_options"])
     model.summary()
 
-    train_gen = image_generator(img_paths, 1)
+    train_gen = image_generator(img_paths, options["train_options"]["batch_size"])
 
     optimizer_options = options["optimizer_options"]
     if options["optimizer"] == "SGD":
@@ -52,6 +58,7 @@ def train(modelname="Model", options=None):
     else:
         print("Only 'SGD' Optimizer is supported")
         sys.exit(-1)
+
     model.compile(optimizer=optimizer,
                   loss=euclidean_distance_loss, metrics=['mse'])
 
@@ -62,9 +69,9 @@ def train(modelname="Model", options=None):
 
 
 def preprocess_input(image, target):
-    # crop image
-    # crop target
-    # resize target
+    '''
+    Crop the image and the target heatmap (also resizes the target)
+    '''
     crop_size = (int(image.shape[0]/2), int(image.shape[1]/2))
 
     if random.randint(0, 9) <= -1:
@@ -83,7 +90,10 @@ def preprocess_input(image, target):
     return(img, target_aug)
 
 
-def image_generator(files, batch_size=64):
+def image_generator(files, batch_size:int=64):
+    '''
+    Creates batches for model-training
+    '''
     while True:
         input_path = np.random.choice(a=files, size=batch_size)
 
@@ -104,13 +114,15 @@ def image_generator(files, batch_size=64):
 
 
 def euclidean_distance_loss(y_true, y_pred):
-    # Euclidean distance as a measure of loss (Loss function)
+    '''
+    Euclidean distance as a measure of loss (Loss function)
+    '''
     return K.sqrt(K.sum(K.square(y_pred - y_true), axis=-1))
 
 
 # Neural network model : VGG + Conv
 class CrowdNet(Sequential):
-    def __init__(self, options):
+    def __init__(self, options:dict):
         super(CrowdNet, self).__init__()
         # Variable Input Size
         rows = None
@@ -202,7 +214,7 @@ class CrowdNet(Sequential):
             else:
                 offset = offset+1
 
-    def addBatchNorm(self, layer, batch_norm=False):
+    def addBatchNorm(self, layer:Layer, batch_norm:bool=False):
         self.add(layer)
         if batch_norm:
             self.add(BatchNormalization())
