@@ -1,9 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm as CM
-import PIL as Image
+from PIL import Image
 
-from data import load_model, get_input, get_output
+from data import get_input, get_output
+from model import load_model
 
 
 def predict(modelname:str, img_path:str):
@@ -22,7 +23,7 @@ def predict(modelname:str, img_path:str):
     '''
     # Function to load image,predict heat map, generate count and return (count , image , heat map)
     model = load_model(modelname)
-    image = get_input(img_path)
+    image = get_input(img_path, True)
     hmap = model.predict(image)
     count = np.sum(hmap)
     return count, image, hmap
@@ -35,6 +36,7 @@ def show_sample(img_path: str, modelname: str=None):
     '''
     if modelname is None:
         img = Image.open(img_path)
+        img = np.array(img)
         groundtruth, _ = get_output(img_path)
         count = np.sum(groundtruth)
         hmap=None 
@@ -47,9 +49,9 @@ def show_sample(img_path: str, modelname: str=None):
         else:
             print("Prediction: {}".format(int(np.sum(count)) + 1))
         fig, ax = plt.subplots(1, 2)
-        ax[0].imshow(img.reshape(img.shape[1], img.shape[2], img.shape[3]))
+        ax[0].imshow(img)
         if hmap is None:
-            ax[2].imshow(groundtruth, cmap=CM.jet)
+            ax[1].imshow(groundtruth, cmap=CM.jet)
         else:
             ax[1].imshow(hmap.reshape(hmap.shape[1], hmap.shape[2]), cmap=CM.jet)
 

@@ -1,3 +1,6 @@
 data/
 documents/
 old/
+*.pb
+*.v2
+*.profile-empty

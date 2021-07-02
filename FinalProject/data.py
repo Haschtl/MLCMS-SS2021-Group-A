@@ -5,13 +5,21 @@ import glob
 from tensorflow.keras.models import model_from_json
 from PIL import Image
 import numpy as np
+import random
+
 
 dataset_folder = "data"
 model_folder = "models"
 weights_folder = "weights"
+analysis_folder = "analysis"
 
 
-def get_image_paths():
+def get_image_sample(**kwargs):
+    images = get_image_paths(**kwargs)
+    return random.choice(images)
+
+
+def get_image_paths(a_train: bool = True, a_test: bool = True, b_train: bool = True, b_test: bool = True):
     '''
     Loads all pathes for the ShanghaiTech dataset in the datafolder
 
@@ -20,53 +28,25 @@ def get_image_paths():
     list
         list of pathes to all images  
     '''
-    part_a_train = os.path.join(
-        dataset_folder, 'part_A_final/train_data', 'images')
-    part_a_test = os.path.join(
-        dataset_folder, 'part_A_final/test_data', 'images')
-    part_b_train = os.path.join(
-        dataset_folder, 'part_B_final/train_data', 'images')
-    part_b_test = os.path.join(
-        dataset_folder, 'part_B_final/test_data', 'images')
-    path_sets = [part_a_train, part_a_test, part_b_train, part_b_test]
+
+    path_sets = []
+    if a_train:
+        path_sets.append(os.path.join(
+            dataset_folder, 'part_A_final/train_data', 'images'))
+    if a_test:
+        path_sets.append(os.path.join(
+            dataset_folder, 'part_A_final/test_data', 'images'))
+    if b_train:
+        path_sets.append(os.path.join(
+            dataset_folder, 'part_B_final/train_data', 'images'))
+    if b_test:
+        path_sets.append(os.path.join(
+            dataset_folder, 'part_B_final/test_data', 'images'))
     img_paths = []
     for path in path_sets:
         for img_path in glob.glob(os.path.join(path, '*.jpg')):
             img_paths.append(img_path)
     return img_paths
-
-
-def load_model(filename: str = 'Model', weightsname: str = None):
-    '''
-    Loads the specified model from the model-directory including their corresponding weights.
-    Do not specify filetypes here! You can also specify the weights as you want
-
-    Returns
-    -------
-    model
-        Tensorflow model
-    '''
-    if weightsname is None:
-        weightsname = filename+".h5"
-    json_file = open(os.path.join(model_folder, filename+".json"), 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    loaded_model = model_from_json(loaded_model_json)
-    loaded_model.load_weights(os.path.join(weights_folder, weightsname+".h5"))
-    return loaded_model
-
-
-def save_model(model, filename: str, weightsname: str = None):
-    '''
-    Saves the model to the model-directory including their corresponding weights.
-    Do not specify filetypes here! You can also specify the weights-filename as you want.
-    '''
-    if weightsname is None:
-        weightsname = filename+".h5"
-    model.save_weights(os.path.join(weights_folder, weightsname))
-    model_json = model.to_json()
-    with open(os.path.join(model_folder, filename+".json"), "w") as json_file:
-        json_file.write(model_json)
 
 
 def imagepath2groundpath(path:str):
@@ -93,7 +73,7 @@ def groundpath2imagepath(path:str):
     return path.replace('.h5', '.jpg').replace('ground', 'images')
 
 
-def get_input(path:str):
+def get_input(path:str, expand=False):
     '''
     Loads an image, scales it to [0,1] and applies a color-filter
 
@@ -113,7 +93,8 @@ def get_input(path:str):
     im[:, :, 1] = (im[:, :, 1]-0.456)/0.224
     im[:, :, 2] = (im[:, :, 2]-0.406)/0.225
 
-    im = np.expand_dims(im, axis=0)
+    if expand:
+        im = np.expand_dims(im, axis=0)
     return im
 
 
@@ -134,10 +115,11 @@ def get_output(path:str):
         target = np.asarray(gt_file['density'])
         img = cv2.resize(target, (int(
             target.shape[1]/8), int(target.shape[0]/8)), interpolation=cv2.INTER_CUBIC)*64
-        img = np.expand_dims(img, axis=3)
+        # img = np.expand_dims(img, axis=3)  # !!! maybe wring
+        img = np.expand_dims(img, axis=2)  # !!! maybe wring
 
         return target, img
-    except Exception:
+    except FileNotFoundError:
         return None, None
 
 
