@@ -64,3 +64,12 @@ def show_sample(img_path: str, modelname: str=None):
         ax[1].imshow(hmap.reshape(hmap.shape[1], hmap.shape[2]), cmap=CM.jet)
         ax[2].imshow(groundtruth, cmap=CM.jet)
     plt.show()
+
+
+if __name__ == "__main__":
+    from tkinter.filedialog import askopenfilename
+
+    filename="y"
+    while filename != "None":
+        filename = askopenfilename()
+        show_sample(filename,"Model")
