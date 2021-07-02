@@ -10,7 +10,7 @@ from model import load_model
 def analyze_model(modelname: str, test_a: bool = True, test_b: bool = True, test_ab: bool = True, train_a: bool = True, train_b: bool = True, train_ab: bool = True, test_all: bool = True):
     model = load_model(modelname)
     if test_a:
-        images = get_image_paths(False,True,False,False)
+        images = get_image_paths(False, True, False, False)
         compare_results(model, images, "A_test")
     if test_b:
         images = get_image_paths(False, False, False, True)
@@ -31,7 +31,8 @@ def analyze_model(modelname: str, test_a: bool = True, test_b: bool = True, test
         images = get_image_paths()
         compare_results(model, images, "all")
 
-def compare_results(model, images, label:str):
+
+def compare_results(model, images, label: str):
     name = []
     y_true = []
     y_pred = []
@@ -46,7 +47,7 @@ def compare_results(model, images, label:str):
         y_pred.append(np.sum(num))
 
     data = pd.DataFrame({'name': name, 'y_pred': y_pred, 'y_true': y_true})
-    mae(y_pred,y_true)
+    mae(y_pred, y_true)
     if not os.path.exists(analysis_folder):
         os.makedirs(analysis_folder)
     data.to_csv('{}/A_on_{}.csv'.format(analysis_folder, label), sep=',')
@@ -56,6 +57,7 @@ def mae(y_pred, y_true):
     mae = mean_absolute_error(np.array(y_true), np.array(y_pred))
     print("Mean absolute error: {}".format(mae))
     return mae
+
 
 if __name__ == "__main__":
     analyze_model("Model")

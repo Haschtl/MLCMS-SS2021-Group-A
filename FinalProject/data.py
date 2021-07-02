@@ -49,7 +49,7 @@ def get_image_paths(a_train: bool = True, a_test: bool = True, b_train: bool = T
     return img_paths
 
 
-def imagepath2groundpath(path:str):
+def imagepath2groundpath(path: str):
     '''
     Loads an image-path and returns the corresponding groundtruth path
 
@@ -61,7 +61,7 @@ def imagepath2groundpath(path:str):
     return path.replace('.jpg', '.h5').replace('images', 'ground')
 
 
-def groundpath2imagepath(path:str):
+def groundpath2imagepath(path: str):
     '''
     Loads a groundtruth-path and returns the corresponding image-path 
 
@@ -73,7 +73,7 @@ def groundpath2imagepath(path:str):
     return path.replace('.h5', '.jpg').replace('ground', 'images')
 
 
-def get_input(path:str, expand=False):
+def get_input(path: str, expand=False):
     '''
     Loads an image, scales it to [0,1] and applies a color-filter
 
@@ -89,16 +89,22 @@ def get_input(path:str, expand=False):
 
     im = im/255.0
 
-    im[:, :, 0] = (im[:, :, 0]-0.485)/0.229
-    im[:, :, 1] = (im[:, :, 1]-0.456)/0.224
-    im[:, :, 2] = (im[:, :, 2]-0.406)/0.225
+    im = filter_input(im)
 
     if expand:
         im = np.expand_dims(im, axis=0)
     return im
 
 
-def get_output(path:str):
+def filter_input(image):
+
+    image[:, :, 0] = (image[:, :, 0]-0.485)/0.229
+    image[:, :, 1] = (image[:, :, 1]-0.456)/0.224
+    image[:, :, 2] = (image[:, :, 2]-0.406)/0.225
+    return image
+
+
+def get_output(path: str):
     '''
     Loads groundtruth data
 
@@ -113,17 +119,22 @@ def get_output(path:str):
     try:
         gt_file = h5py.File(path, 'r')
         target = np.asarray(gt_file['density'])
-        img = cv2.resize(target, (int(
-            target.shape[1]/8), int(target.shape[0]/8)), interpolation=cv2.INTER_CUBIC)*64
-        # img = np.expand_dims(img, axis=3)  # !!! maybe wring
-        img = np.expand_dims(img, axis=2)  # !!! maybe wring
+        img = scale_image(target, 8)
+        img = np.expand_dims(img, axis=2)
 
         return target, img
     except FileNotFoundError:
         return None, None
 
 
-def write_output(density, file_path:str):
+def scale_image(image, factor=8, inv=False):
+    if inv:
+        factor = 1/factor
+    return cv2.resize(image, (int(
+        image.shape[1]/factor), int(image.shape[0]/factor)), interpolation=cv2.INTER_CUBIC)*factor*factor
+
+
+def write_output(density, file_path: str):
     '''
     Writes a density-map to the output
     '''

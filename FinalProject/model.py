@@ -1,4 +1,5 @@
 import os
+import math
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # disable gpu
 import sys
 import numpy as np
@@ -24,9 +25,9 @@ defaultOptions = {
     },
     "lossfunction": "euclidean-norm",
     "train_options": {
-        "batch_size": 1,
-        "epochs": 1,
-        "steps_per_epoch": 1
+        "batch_size": 64,   # 1
+        "epochs": 5,  # 1
+        "steps_per_epoch": 10   # 700
     },
     "model_options": {
         "batch_norm": False
@@ -49,7 +50,8 @@ def train(modelname: str = "Model", options: dict = None, tensorboard=False):
     model = CrowdNet(options["model_options"], True)
     model.summary()
 
-    train_gen = image_generator(img_paths, options["train_options"]["batch_size"])
+    train_gen = image_generator(
+        img_paths, options["train_options"]["batch_size"])
 
     optimizer_options = options["optimizer_options"]
     if options["optimizer"] == "SGD":
@@ -112,29 +114,8 @@ def save_model(model, filename: str, weightsname: str = None):
         json_file.write(model_json)
 
 
-def preprocess_input(image, target):
-    '''
-    Crop the image and the target heatmap (also resizes the target)
-    '''
-    crop_size = (int(image.shape[0]/2), int(image.shape[1]/2))
 
-    if random.randint(0, 9) <= -1:
-        dx = int(random.randint(0, 1)*image.shape[0]*1./2)
-        dy = int(random.randint(0, 1)*image.shape[1]*1./2)
-    else:
-        dx = int(random.random()*image.shape[0]*1./2)
-        dy = int(random.random()*image.shape[1]*1./2)
-
-    #print(crop_size , dx , dy)
-    img = image[dx: crop_size[0]+dx, dy:crop_size[1]+dy]
-
-    target_aug = target[dx:crop_size[0]+dx, dy:crop_size[1]+dy]
-    # print(img.shape)
-
-    return(img, target_aug)
-
-
-def image_generator(files, batch_size:int=64):
+def image_generator(files, batch_size: int = 64):
     '''
     Creates batches for model-training
     (necessary as tensorflow only allows batches of data with same shape but images have different shapes)
@@ -150,11 +131,39 @@ def image_generator(files, batch_size:int=64):
             _, _output = get_output(input_path)
             batch_input.append(_input)
             batch_output.append(_output)
-
-        batch_x = np.array(batch_input)
-        batch_y = np.array(batch_output)
+        batch_input, batch_output = crop_images(batch_input, batch_output)
+        batch_x = np.stack(batch_input)
+        batch_y = np.stack(batch_output)
 
         yield(batch_x, batch_y)
+
+
+def crop_images(input, output):
+    '''
+    Crop the image and the target heatmap (also resizes the target)
+    '''
+    minshape_out = get_min_shape(output)
+    minshape_in = (minshape_out[0]*8, minshape_out[1]*8)
+    cropped_input = []
+    cropped_output = []
+    for idx,_ in enumerate(output):
+        cropped_output.append(crop_center(
+            output[idx], minshape_out[0], minshape_out[1]))
+        cropped_input.append(crop_center(
+            input[idx], minshape_in[0], minshape_in[1]))
+    return cropped_input, cropped_output
+
+
+def crop_center(img, crop_x, crop_y):
+    start_x = math.floor(img.shape[0]/2-(crop_x/2))
+    start_y = math.floor(img.shape[1]/2-(crop_y/2))
+    return img[start_x:start_x+crop_x, start_y:start_y+crop_y,:]
+
+
+def get_min_shape(arrays):
+    x = [a.shape[0] for a in arrays]
+    y = [a.shape[1] for a in arrays]
+    return (min(x), min(y))
 
 
 def euclidean_distance_loss(y_true, y_pred):
@@ -195,17 +204,16 @@ class CrowdNet(Sequential):
         for conv in range(convolutions):
             if input_shape is not None:
                 self.add(Conv2D(filters, input_shape=input_shape, kernel_size=self.vgg_kernel_size, kernel_initializer=self.kernel_initializer,
-                                         activation='relu', padding='same', name="VGG_C{}_{}".format(filters, conv)))
+                                activation='relu', padding='same', name="VGG_C{}_{}".format(filters, conv)))
             else:
-                self.add(Conv2D(filters ,kernel_size=self.vgg_kernel_size, kernel_initializer=self.kernel_initializer,
-                                        activation='relu', padding='same', name="VGG_C{}_{}".format(filters, conv)))
+                self.add(Conv2D(filters, kernel_size=self.vgg_kernel_size, kernel_initializer=self.kernel_initializer,
+                                activation='relu', padding='same', name="VGG_C{}_{}".format(filters, conv)))
             if self.batch_norm:
                 self.add(BatchNormalization())
             input_shape = None
 
         if maxpool:
             self.add(MaxPooling2D(strides=2, name="VGG_MAX_{}".format(filters)))
-
 
     def addGAPLayers(self):
         # Conv2D
